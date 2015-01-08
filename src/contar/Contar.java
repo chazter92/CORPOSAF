@@ -24,8 +24,8 @@ public class Contar  {
             public void run() {
                 // Install WebLaF as application L&F
                 WebLookAndFeel.install();
-                frmLogin login = new frmLogin();
-                
+                //frmLogin login = new frmLogin();
+                FrmPrincipal principal = new FrmPrincipal(); 
             }
 
             
