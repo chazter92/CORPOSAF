@@ -13,9 +13,9 @@ public class BDO_Cliente {
     String direccion;
     String email;
     String nombre_factura;
-    int telefono;
+    String telefono;
 
-    public BDO_Cliente(String nit, String nombre, String direccion, String email, String nombre_factura, int telefono) {
+    public BDO_Cliente(String nit, String nombre, String direccion, String email, String nombre_factura, String telefono) {
         this.nit = nit;
         this.nombre = nombre;
         this.direccion = direccion;
@@ -64,13 +64,16 @@ public class BDO_Cliente {
         this.nombre_factura = nombre_factura;
     }
 
-    public int getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(int telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 
+    public String basicsToString(){
+        return nit + "  | " + nombre;
+    }
    
 }

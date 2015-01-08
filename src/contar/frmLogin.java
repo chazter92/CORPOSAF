@@ -27,12 +27,12 @@ import java.awt.event.ActionListener;
  *
  * @author Chaz
  */
-class frmLogin extends WebDialog{
+class FrmLogin extends WebDialog{
     
     WebPanel content;
     WebTextField user;
     WebPasswordField pass;
-     public frmLogin(){
+     public FrmLogin(){
         super();
         construirGUI();
         setSize(300,200);
@@ -82,7 +82,7 @@ class frmLogin extends WebDialog{
                         if(user.getText().equals("admin") && pass.getText().equals("password")){
                             WebOptionPane.showMessageDialog ( null, "Datos correctos, bienvenido", "Bienvenido", WebOptionPane.INFORMATION_MESSAGE );
                             dispose();
-                            frmPrincipal principal = new frmPrincipal();
+                            FrmPrincipal principal = new FrmPrincipal();
                         }else{
                             WebOptionPane.showMessageDialog ( null, "Verifique los datos ingresados", "Error", WebOptionPane.ERROR_MESSAGE );
                         }
