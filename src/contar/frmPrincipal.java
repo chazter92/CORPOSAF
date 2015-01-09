@@ -4,6 +4,7 @@
  */
 package contar;
 
+import contar.clientes.FrmCliente;
 import com.alee.extended.layout.ToolbarLayout;
 import com.alee.extended.painter.TexturePainter;
 import com.alee.extended.statusbar.WebMemoryBar;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 
 /**
@@ -171,6 +171,7 @@ public class FrmPrincipal extends WebFrame {
         btnFrmCliente.setBounds ( 5, posY, 120, 75 );
         desktopPane.add(btnFrmCliente);
         //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmCliente.setLocation(20,20);
         frmCliente.pack();
         frmCliente.close();
     }
