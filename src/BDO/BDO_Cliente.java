@@ -31,8 +31,21 @@ public class BDO_Cliente {
         this.telefono = telefono;
         this.precio = precio;
         this.estado = estado;
-        //this.atributos = connAtributoValorCliente.atributosCliente(nit);
     }
+
+    public BDO_Cliente(String nit, String nombre, String direccion, String email, String nombre_factura, String telefono, int precio, int estado, ArrayList<BDO_Atributo_Valor_Cliente> atributos) {
+        this.nit = nit;
+        this.nombre = nombre;
+        this.direccion = direccion;
+        this.email = email;
+        this.nombre_factura = nombre_factura;
+        this.telefono = telefono;
+        this.precio = precio;
+        this.estado = estado;
+        this.atributos = atributos;
+    }
+
+    
 
     public ArrayList<BDO_Atributo_Valor_Cliente> getAtributos() {
         return atributos;
@@ -113,6 +126,10 @@ public class BDO_Cliente {
 
     public Object[] getTypes() {
         return new Object[] {"nit","nombre","direccion","email","nombrefacturar","telefono",1,1,1};
+    }
+    
+    public void cargarAtributos(){
+        this.atributos = connAtributoValorCliente.atributosCliente(nit);
     }
    
 }

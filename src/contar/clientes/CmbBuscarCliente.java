@@ -99,6 +99,7 @@ public class CmbBuscarCliente extends WebComboBox {
                 if(datosCliente.length>2){
                     BDO_Cliente clienteEncontrado = Catalogos.buscarCliente(datosCliente[0]);
                     if(clienteEncontrado !=null){
+                        clienteEncontrado.cargarAtributos();
                         setClienteSeleccionado(clienteEncontrado);
                         return true;
                     }

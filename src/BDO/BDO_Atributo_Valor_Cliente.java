@@ -12,6 +12,9 @@ import com.alee.managers.tooltip.TooltipManager;
 import contar.Catalogos;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import javax.swing.JTextField;
 
 /**
  *
@@ -66,6 +69,19 @@ public class BDO_Atributo_Valor_Cliente {
         txtValor.setInputPrompt(atributo_cliente.descripcion);
         txtValor.setHideInputPromptOnFocus(false);
         txtValor.setText(valor);
+        txtValor.addFocusListener(new FocusListener(){
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                ((JTextField)e.getComponent()).selectAll(); 
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                valor = ((JTextField)e.getComponent()).getText();
+            }
+            
+        });
         WebPanel pnlValor = new WebPanel();
         pnlValor.setLayout(new FlowLayout());
         pnlValor.add(new WebLabel(atributo_cliente.nombre + ":"));

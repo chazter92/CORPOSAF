@@ -43,7 +43,7 @@ public class DAO_Atributo_Valor_Cliente {
    
    public ArrayList<BDO_Atributo_Valor_Cliente> atributosCliente(String nit){
         HashMap<String, BDO_Atributo_Valor_Cliente> atributos;
-        atributos = toBDO(conn.query("SELECT A.nombre, B.* FROM atributo_cliente A LEFT JOIN (SELECT D.id_atributo_cliente, D.valor, C.nit FROM cliente C JOIN atributo_valor_cliente D ON C.nit = D.nit WHERE C.nit = ?) as B ON A.id_atributo_cliente = B.id_atributo_cliente ", new Object[]{nit}, new Object[]{nit}));        
+        atributos = toBDO(conn.query("SELECT A.id_atributo_cliente, A.nombre, B.valor, B.nit FROM atributo_cliente A LEFT JOIN (SELECT D.id_atributo_cliente, D.valor, C.nit FROM cliente C JOIN atributo_valor_cliente D ON C.nit = D.nit WHERE C.nit = ?) as B ON A.id_atributo_cliente = B.id_atributo_cliente ", new Object[]{nit}, new Object[]{nit}));        
         return new ArrayList<BDO_Atributo_Valor_Cliente>(atributos.values());
    } 
 }

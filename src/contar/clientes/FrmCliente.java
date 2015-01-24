@@ -4,6 +4,7 @@
  */
 package contar.clientes;
 
+import BDO.BDO_Atributo_Valor_Cliente;
 import BDO.BDO_Cliente;
 import BDO.BDO_Estado_Cliente;
 import BDO.BDO_Precio_Cliente;
@@ -64,6 +65,8 @@ public class FrmCliente extends WebInternalFrame {
     private final int columnasDatos = 25;
     private DAO_Cliente connCliente;
     private boolean editarCliente = false;
+    private WebScrollPane scrDatos;
+    private WebPanel pnlIzquierdo, pnlDerecho;
 
     public ImageIcon loadIcon(final String path) {
         return loadIcon(getClass(), path);
@@ -147,7 +150,7 @@ public class FrmCliente extends WebInternalFrame {
     private void agregarComponentenesDatosCliente() {
         pnlDatosCliente.setLayout(new BorderLayout());
         pnlDatosCliente.add(agregarPanelSuperiorDatosCliente(), BorderLayout.NORTH);
-        pnlDatosCliente.add(agregarDatosIndividualesCliente(), BorderLayout.CENTER);
+        pnlDatosCliente.add(agregarDatosIndividualesCliente(null), BorderLayout.CENTER);
         pnlDatosCliente.add(agregarPanelBotonesDatos(), BorderLayout.SOUTH);
         pnlDatosCliente.setBorder(new EmptyBorder((int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025), (int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025)));
     }
@@ -180,13 +183,13 @@ public class FrmCliente extends WebInternalFrame {
         return pnlBotonesDatosIndividuales;
     }
 
-    private Component agregarDatosIndividualesCliente() {
+    private Component agregarDatosIndividualesCliente(BDO_Cliente clienteSeleccionado) {
         WebPanel pnlDatosIndividuales = new WebPanel();
         pnlDatosIndividuales.setLayout(new FlowLayout());
 
-        WebPanel pnlIzquierdo = new WebPanel();
+        pnlIzquierdo = new WebPanel();
         pnlIzquierdo.setLayout(new BoxLayout(pnlIzquierdo, BoxLayout.Y_AXIS));
-        WebPanel pnlDerecho = new WebPanel();
+        pnlDerecho = new WebPanel();
         pnlDerecho.setLayout(new BoxLayout(pnlDerecho, BoxLayout.Y_AXIS));
 
 
@@ -298,13 +301,29 @@ public class FrmCliente extends WebInternalFrame {
         TooltipManager.setTooltip(pnlEstadoCliente, "Seleccione el estado del cliente", TooltipWay.up);
         cmbEstadoCliente.setToolTipText("Seleccione el estado del cliente");
         pnlDerecho.add(pnlEstadoCliente);
-
+        
+        
+        if (clienteSeleccionado != null) {
+            clienteSeleccionado.cargarAtributos();
+            ArrayList<BDO_Atributo_Valor_Cliente> atributos = clienteSeleccionado.getAtributos();
+            if(atributos != null){
+            for(int i=0; i<atributos.size();i++){
+                if(i%2 == 0){
+                    pnlDerecho.add(atributos.get(i).toPanel(columnasDatos));
+                }else{
+                    pnlIzquierdo.add(atributos.get(i).toPanel(columnasDatos));
+                }
+            }
+            }
+        }
+        
+        
         pnlDatosIndividuales.add(pnlIzquierdo);
         pnlDatosIndividuales.add(pnlDerecho);
-        WebScrollPane scroll = new WebScrollPane(pnlDatosIndividuales);
-        scroll.setBorder(null);
-        actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
-        return scroll;
+        scrDatos = new WebScrollPane(pnlDatosIndividuales);
+        scrDatos.setBorder(null);
+        //actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
+        return scrDatos;
     }
 
     private Component agregarPanelSuperiorDatosCliente() {
@@ -409,11 +428,6 @@ public class FrmCliente extends WebInternalFrame {
 
     public void editarCliente() {
         editarCliente = true;
-        btnEditarCliente.setEnabled(false);
-        btnGuardarCliente.setEnabled(true);
-        btnCancelar.setEnabled(true);
-        cmbDatosCliente.setEnabled(false);
-        btnNuevoCliente.setEnabled(false);
         cambiarBloqueoCampos(true);
     }
 
@@ -424,18 +438,13 @@ public class FrmCliente extends WebInternalFrame {
             BDO_Cliente nuevo = new BDO_Cliente(txtNit.getText().trim(), txtNombre.getText().trim(),
                     txtDireccion.getText().trim(), txtEmail.getText().trim(), txtNombreFacturar.getText().trim(),
                     txtTelefono.getText().trim(), Integer.parseInt(cmbPrecioCliente.getSelectedItem().toString().split(" | ")[0]),
-                    Integer.parseInt(cmbEstadoCliente.getSelectedItem().toString().split(" | ")[0]));
+                    Integer.parseInt(cmbEstadoCliente.getSelectedItem().toString().split(" | ")[0]),cmbDatosCliente.getClienteSeleccionado().getAtributos());
             if (editarCliente) {
                 connCliente.actualizarCliente(nuevo, cmbDatosCliente.getClienteSeleccionado());
             } else {
                 connCliente.agregarCliente(nuevo);
             }
 
-            btnEditarCliente.setEnabled(true);
-            btnGuardarCliente.setEnabled(false);
-            btnCancelar.setEnabled(false);
-            cmbDatosCliente.setEnabled(true);
-            btnNuevoCliente.setEnabled(true);
             cambiarBloqueoCampos(false);
             editarCliente = false;
             actualizarClientes();
@@ -480,17 +489,18 @@ public class FrmCliente extends WebInternalFrame {
 
     public void cancelarOperacion() {
         editarCliente = false;
-        btnEditarCliente.setEnabled(true);
-        btnGuardarCliente.setEnabled(false);
-        btnCancelar.setEnabled(false);
-        cmbDatosCliente.setEnabled(true);
-        btnNuevoCliente.setEnabled(true);
         actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
         cambiarBloqueoCampos(false);
     }
 
     public void actualizarDatos(BDO_Cliente clienteSeleccionado) {
         if (clienteSeleccionado != null) {
+            BorderLayout lyt = (BorderLayout) pnlDatosCliente.getLayout();
+            if(lyt.getLayoutComponent(BorderLayout.CENTER) != null){
+                pnlDatosCliente.remove(lyt.getLayoutComponent(BorderLayout.CENTER));
+            }
+            
+            pnlDatosCliente.add(agregarDatosIndividualesCliente(clienteSeleccionado), BorderLayout.CENTER);
             txtNit.setText(clienteSeleccionado.getNit());
             txtNombre.setText(clienteSeleccionado.getNombre());
             txtNombreFacturar.setText(clienteSeleccionado.getNombre_factura());
@@ -499,25 +509,41 @@ public class FrmCliente extends WebInternalFrame {
             txtTelefono.setText(clienteSeleccionado.getTelefono());
             cmbPrecioCliente.setSelectedItem(Catalogos.buscarPrecioClienteInt(clienteSeleccionado.getPrecio()).basicsToString());
             cmbEstadoCliente.setSelectedItem(Catalogos.buscarEstadoClienteInt(clienteSeleccionado.getEstado()).basicsToString());
-            
-            cargarAtributos(clienteSeleccionado.getNit());
+            pnlDatosCliente.repaint();
+            cambiarBloqueoCampos(false);
+            pack();
         }
-    }
-    
-    public void cargarAtributos(String nit){
-
     }
 
     private void cambiarBloqueoCampos(boolean bloqueo) {
-        txtNit.setEnabled(bloqueo);
+        /*txtNit.setEnabled(bloqueo);
         txtNombre.setEnabled(bloqueo);
         txtNombreFacturar.setEnabled(bloqueo);
         txtDireccion.setEnabled(bloqueo);
         txtEmail.setEnabled(bloqueo);
         txtTelefono.setEnabled(bloqueo);
         cmbPrecioCliente.setEnabled(bloqueo);
-        cmbEstadoCliente.setEnabled(bloqueo);
-
+        cmbEstadoCliente.setEnabled(bloqueo);*/
+        btnNuevoCliente.setEnabled(!bloqueo);
+        btnEditarCliente.setEnabled(!bloqueo);
+        cmbDatosCliente.setEnabled(!bloqueo);
+        btnGuardarCliente.setEnabled(bloqueo);
+        btnCancelar.setEnabled(bloqueo);
+        
+       
+        
+        for(int i =0;i<pnlIzquierdo.getComponentCount();i++){
+            WebPanel pnlIz = (WebPanel) pnlIzquierdo.getComponent(i);
+            for (Component c : pnlIz.getComponents()){
+                c.setEnabled(bloqueo);
+            }
+        }
+        for(int i =0;i<pnlDerecho.getComponentCount();i++){
+            WebPanel pnlIz = (WebPanel) pnlDerecho.getComponent(i);
+             for (Component c : pnlIz.getComponents()){
+                c.setEnabled(bloqueo);
+            }
+        }
     }
 
     private void limpiarCampos() {
@@ -530,12 +556,7 @@ public class FrmCliente extends WebInternalFrame {
     }
 
     private void nuevoCliente() {
-        editarCliente = false;
-        btnNuevoCliente.setEnabled(false);
-        btnEditarCliente.setEnabled(false);
-        cmbDatosCliente.setEnabled(false);
-        btnGuardarCliente.setEnabled(true);
-        btnCancelar.setEnabled(true);
+        editarCliente = false;        
         cambiarBloqueoCampos(true);
         limpiarCampos();
     }
