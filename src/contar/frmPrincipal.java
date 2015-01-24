@@ -19,6 +19,12 @@ import com.alee.laf.rootpane.WebFrame;
 import com.alee.laf.tabbedpane.WebTabbedPane;
 import com.alee.managers.hotkey.Hotkey;
 import com.alee.managers.hotkey.HotkeyManager;
+import com.alee.managers.language.data.TooltipWay;
+import com.alee.managers.tooltip.TooltipManager;
+import contar.clientes.FrmAtributoCliente;
+import contar.clientes.FrmEstadoCliente;
+import contar.clientes.FrmPrecioCliente;
+import contar.productos.FrmCategoriaProducto;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -50,12 +56,12 @@ public class FrmPrincipal extends WebFrame {
         
     public FrmPrincipal(){
         super();
+        Catalogos.cargarCatologos();
         createUI();
         show();
     }
     
-    
-    public void createUI(){
+    private void createUI(){
         desktopPane = new WebDesktopPane();
         contentPane = new WebPanel(); 
         statusBar = new WebStatusBar ();
@@ -67,9 +73,9 @@ public class FrmPrincipal extends WebFrame {
         facturasDesktop.setOpaque( false );
         clientesDesktop.setOpaque( false );
         productosDesktop.setOpaque( false ); 
-        createSimpleFrame("Facturas", "Agregar facturas",25,desktopPane, Color.WHITE);
+        //createSimpleFrame("Facturas", "Agregar facturas",25,desktopPane, Color.WHITE);
         //createSimpleFrame("Clientes", "Agregar clientes",125,desktopPane, Color.WHITE);
-        createSimpleFrame("Proveedores", "Agregar proveedores",225,desktopPane, Color.WHITE);
+        //createSimpleFrame("Proveedores", "Agregar proveedores",225,desktopPane, Color.WHITE);
         createSimpleFrame("Nueva factura", "Crear nueva factura", 25, facturasDesktop, Color.BLACK);
         createSimpleFrame("Imprimir factura", "Imprimir factura existente", 125, facturasDesktop, Color.BLACK);
         createSimpleFrame("Visualizar factura", "Ver factura existente o anularla", 225, facturasDesktop, Color.BLACK);
@@ -82,8 +88,10 @@ public class FrmPrincipal extends WebFrame {
         createSimpleFrame("Precios de venta", "Agregar precios de venta a los productos", 225, productosDesktop, Color.BLACK);
         HotkeyManager.installShowAllHotkeysAction ( getRootPane (), Hotkey.F1 );
         crearModuloClientes();
-        
-        
+        crearModuloEstadoClientes();
+        crearModuloPrecioClientes();
+        crearModuloCategoriasProducto();
+        crearModuloAtributosCliente();
         contentPane.add(agregarBarraEstado(), BorderLayout.SOUTH);
         contentPane.add(agregarPestañas(), BorderLayout.CENTER);
         setSize(screenSize.width-100,screenSize.height-100);
@@ -119,23 +127,218 @@ public class FrmPrincipal extends WebFrame {
         return loadIcon ( getClass (), path );
     }
 
-    public ImageIcon loadIcon ( final Class nearClass, final String path )
-    {
-        final String key = nearClass.getCanonicalName () + ":" + path;
-        if ( !iconsCache.containsKey ( key ) )
-        {
-            iconsCache.put ( key, new ImageIcon ( nearClass.getResource ( "icons/" + path ) ) );
+    public static ImageIcon loadIcon(final Class nearClass, final String path) {
+        try {
+            final String key = nearClass.getCanonicalName() + ":" + path;
+            if (!iconsCache.containsKey(key)) {
+                iconsCache.put(key, new ImageIcon(nearClass.getResource("icons/" + path)));
+            }
+            return iconsCache.get(key);
+        } catch (Exception e) {
+            return new ImageIcon();
         }
-        return iconsCache.get ( key );
     }
     
     private void crearModuloClientes(){
-        agregarBtnFrmCliente(125,desktopPane, Color.WHITE);
+        agregarBtnFrmCliente(25,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloAtributosCliente(){
+        agregarBtnFrmAtributoCliente(425,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloPrecioClientes(){
+        agregarBtnFrmPrecioCliente(125,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloEstadoClientes(){
+        agregarBtnFrmEstadoCliente(225,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloCategoriasProducto(){
+        agregarBtnFrmCategoriaProducto(325,desktopPane, Color.WHITE);
+    }
+    
+    private void agregarBtnFrmCategoriaProducto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmCategoriaProducto frmCategoriaProducto = new FrmCategoriaProducto();
+        final WebButton btnFrmCategoriaProducto = new WebButton ( "Categorias de productos", loadIcon ( "categories.png" ) );
+        TooltipManager.setTooltip(btnFrmCategoriaProducto, "Categorias de productos", TooltipWay.down);
+        btnFrmCategoriaProducto.setForeground(colorFuente);
+        btnFrmCategoriaProducto.setRolloverDecoratedOnly ( true );
+        btnFrmCategoriaProducto.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmCategoriaProducto.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmCategoriaProducto.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmCategoriaProducto.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmCategoriaProducto.isClosed () )
+                {
+                    if ( frmCategoriaProducto.getParent () == null )
+                    {
+                        desktopPane.add ( frmCategoriaProducto );
+                    }
+                    frmCategoriaProducto.open ();
+                    frmCategoriaProducto.pack();
+                    frmCategoriaProducto.setIcon ( false );
+                }
+                else
+                {
+                    frmCategoriaProducto.setIcon ( !frmCategoriaProducto.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmCategoriaProducto.addMouseListener ( moveAdapter1 );
+        btnFrmCategoriaProducto.addMouseMotionListener ( moveAdapter1 );
+        btnFrmCategoriaProducto.setBounds ( 5, posY, 120, 75 );
+        desktopPane.add(btnFrmCategoriaProducto);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmCategoriaProducto.setLocation(20,20);
+        frmCategoriaProducto.pack();
+        frmCategoriaProducto.close();
+    }
+    
+    private void agregarBtnFrmAtributoCliente(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmAtributoCliente frmAtributoCliente = new FrmAtributoCliente();
+        final WebButton btnFrmAtributoCliente = new WebButton ( "Atributos de los clientes", loadIcon ( "categories.png" ) );
+        TooltipManager.setTooltip(btnFrmAtributoCliente, "Atributos de clientes", TooltipWay.down);
+        btnFrmAtributoCliente.setForeground(colorFuente);
+        btnFrmAtributoCliente.setRolloverDecoratedOnly ( true );
+        btnFrmAtributoCliente.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmAtributoCliente.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmAtributoCliente.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmAtributoCliente.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmAtributoCliente.isClosed () )
+                {
+                    if ( frmAtributoCliente.getParent () == null )
+                    {
+                        desktopPane.add ( frmAtributoCliente );
+                    }
+                    frmAtributoCliente.open ();
+                    frmAtributoCliente.pack();
+                    frmAtributoCliente.setIcon ( false );
+                }
+                else
+                {
+                    frmAtributoCliente.setIcon ( !frmAtributoCliente.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmAtributoCliente.addMouseListener ( moveAdapter1 );
+        btnFrmAtributoCliente.addMouseMotionListener ( moveAdapter1 );
+        btnFrmAtributoCliente.setBounds ( 5, posY, 120, 75 );
+        desktopPane.add(btnFrmAtributoCliente);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmAtributoCliente.setLocation(20,20);
+        frmAtributoCliente.pack();
+        frmAtributoCliente.close();
+    }
+    
+    private void agregarBtnFrmPrecioCliente(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmPrecioCliente frmPrecioCliente = new FrmPrecioCliente();
+        final WebButton btnFrmPreciosCliente = new WebButton ( "Precios de cliente", loadIcon ( "account_balances.png" ) );
+        TooltipManager.setTooltip(btnFrmPreciosCliente, "Precios de cliente", TooltipWay.down);
+        btnFrmPreciosCliente.setForeground(colorFuente);
+        btnFrmPreciosCliente.setRolloverDecoratedOnly ( true );
+        btnFrmPreciosCliente.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmPreciosCliente.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmPreciosCliente.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmPreciosCliente.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmPrecioCliente.isClosed () )
+                {
+                    if ( frmPrecioCliente.getParent () == null )
+                    {
+                        desktopPane.add ( frmPrecioCliente );
+                    }
+                    frmPrecioCliente.open ();
+                    frmPrecioCliente.pack();
+                    frmPrecioCliente.setIcon ( false );
+                }
+                else
+                {
+                    frmPrecioCliente.setIcon ( !frmPrecioCliente.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmPreciosCliente.addMouseListener ( moveAdapter1 );
+        btnFrmPreciosCliente.addMouseMotionListener ( moveAdapter1 );
+        btnFrmPreciosCliente.setBounds ( 5, posY, 120, 75 );
+        desktopPane.add(btnFrmPreciosCliente);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmPrecioCliente.setLocation(20,20);
+        frmPrecioCliente.pack();
+        frmPrecioCliente.close();
+    }
+    
+    private void agregarBtnFrmEstadoCliente(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmEstadoCliente frmEstadoCliente = new FrmEstadoCliente();
+        final WebButton btnFrmEstadosCliente = new WebButton ( "Estados de cliente", loadIcon ( "account_menu.png" ) );
+        TooltipManager.setTooltip(btnFrmEstadosCliente, "Estados de cliente", TooltipWay.down);
+        btnFrmEstadosCliente.setForeground(colorFuente);
+        btnFrmEstadosCliente.setRolloverDecoratedOnly ( true );
+        btnFrmEstadosCliente.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmEstadosCliente.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmEstadosCliente.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmEstadosCliente.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmEstadoCliente.isClosed () )
+                {
+                    if ( frmEstadoCliente.getParent () == null )
+                    {
+                        desktopPane.add ( frmEstadoCliente );
+                    }
+                    frmEstadoCliente.open ();
+                    frmEstadoCliente.pack();
+                    frmEstadoCliente.setIcon ( false );
+                }
+                else
+                {
+                    frmEstadoCliente.setIcon ( !frmEstadoCliente.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmEstadosCliente.addMouseListener ( moveAdapter1 );
+        btnFrmEstadosCliente.addMouseMotionListener ( moveAdapter1 );
+        btnFrmEstadosCliente.setBounds ( 5, posY, 120, 75 );
+        desktopPane.add(btnFrmEstadosCliente);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmEstadoCliente.setLocation(20,20);
+        frmEstadoCliente.pack();
+        frmEstadoCliente.close();
     }
     
     private void agregarBtnFrmCliente(int posY, final WebDesktopPane desktopPane, Color colorFuente){
         final FrmCliente frmCliente = new FrmCliente();
         final WebButton btnFrmCliente = new WebButton ( "Clientes", loadIcon ( "users_4.png" ) );
+        TooltipManager.setTooltip(btnFrmCliente, "Módulo de cliente", TooltipWay.down);
         btnFrmCliente.setForeground(colorFuente);
         btnFrmCliente.setRolloverDecoratedOnly ( true );
         btnFrmCliente.setHorizontalTextPosition ( WebButton.CENTER );
@@ -214,7 +417,7 @@ public class FrmPrincipal extends WebFrame {
         DesktopPaneIconMoveAdapter ma1 = new DesktopPaneIconMoveAdapter ();
         internalFrameIcon.addMouseListener ( ma1 );
         internalFrameIcon.addMouseMotionListener ( ma1 );
-        internalFrameIcon.setBounds ( 5, posY, 120, 75 );
+        internalFrameIcon.setBounds ( 7, posY, 120, 75 );
         desktopPane.add ( internalFrameIcon );
         WebTabbedPane pestañas = new  WebTabbedPane();
         WebPanel panel1 = new WebPanel();
