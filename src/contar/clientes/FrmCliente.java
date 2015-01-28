@@ -4,11 +4,14 @@
  */
 package contar.clientes;
 
+import BDO.BDO_Atributo_Cliente;
 import BDO.BDO_Atributo_Valor_Cliente;
 import BDO.BDO_Cliente;
 import BDO.BDO_Estado_Cliente;
 import BDO.BDO_Precio_Cliente;
+import DAO.DAO_Atributo_Valor_Cliente;
 import DAO.DAO_Cliente;
+import com.alee.global.StyleConstants;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.combobox.WebComboBox;
 import com.alee.laf.desktoppane.WebInternalFrame;
@@ -37,6 +40,8 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.table.AbstractTableModel;
@@ -51,12 +56,11 @@ import validacion.Validar_Vacio;
  */
 public class FrmCliente extends WebInternalFrame {
 
-    private WebPanel pnlDatosCliente;
-    private WebPanel pnlConsultaCliente;
+    private WebPanel pnlDatosCliente, pnlConsultaCliente, pnlBusquedaAvanzadaCliente;
     private WebTabbedPane pnlPestañasCliente;
     private static final Map<String, ImageIcon> iconsCache = new HashMap<String, ImageIcon>();
     private CmbBuscarCliente cmbConsultaCliente, cmbDatosCliente;
-    private WebTable tblClientes;
+    private WebTable tblClientes, tblBusquedaAvanzada;
     private WebButton btnEditarCliente, btnNuevoCliente, btnVerCliente, btnGuardarCliente, btnCancelar;
     private WebTextField txtNit, txtNombre, txtDireccion, txtEmail, txtTelefono, txtNombreFacturar;
     private WebComboBox cmbPrecioCliente, cmbEstadoCliente;
@@ -64,9 +68,12 @@ public class FrmCliente extends WebInternalFrame {
     static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     private final int columnasDatos = 25;
     private DAO_Cliente connCliente;
+    private DAO_Atributo_Valor_Cliente connAtributoValorCliente;
     private boolean editarCliente = false;
     private WebScrollPane scrDatos;
-    private WebPanel pnlIzquierdo, pnlDerecho;
+    private WebPanel pnlIzquierdo, pnlDerecho, pnlParametros, pnlTags;
+    private ClientesTableModel modelBusquedaAvanzada;
+    private ArrayList<BDO_Atributo_Valor_Cliente> parametrosBusquedaAvanzada;
 
     public ImageIcon loadIcon(final String path) {
         return loadIcon(getClass(), path);
@@ -92,9 +99,11 @@ public class FrmCliente extends WebInternalFrame {
     private void createUI() {
         pnlDatosCliente = new WebPanel();
         pnlConsultaCliente = new WebPanel();
+        pnlBusquedaAvanzadaCliente = new WebPanel();
         pnlPestañasCliente = new WebTabbedPane();
         agregarComponentenesDatosCliente();
         agregarComponentenesConsultaCliente();
+        agregarComponentesBusquedaAvanzada();
         agregarPestañasCliente();
         add(pnlPestañasCliente);
         setFrameIcon(loadIcon("users_4.png"));
@@ -145,6 +154,7 @@ public class FrmCliente extends WebInternalFrame {
     private void agregarPestañasCliente() {
         pnlPestañasCliente.addTab("Mis clientes", loadIcon("users_edit.png"), pnlConsultaCliente);
         pnlPestañasCliente.addTab("Datos del cliente", loadIcon("folder_user.png"), pnlDatosCliente);
+        pnlPestañasCliente.addTab("Búsqueda avanzada", loadIcon("search_accounts.png"), pnlBusquedaAvanzadaCliente);
     }
 
     private void agregarComponentenesDatosCliente() {
@@ -153,6 +163,83 @@ public class FrmCliente extends WebInternalFrame {
         pnlDatosCliente.add(agregarDatosIndividualesCliente(null), BorderLayout.CENTER);
         pnlDatosCliente.add(agregarPanelBotonesDatos(), BorderLayout.SOUTH);
         pnlDatosCliente.setBorder(new EmptyBorder((int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025), (int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025)));
+    }
+    
+    private void agregarComponentesBusquedaAvanzada() {
+        pnlBusquedaAvanzadaCliente.setLayout(new BorderLayout());
+        pnlBusquedaAvanzadaCliente.add(agregarPanelParametrosBusquedaAvanzada(), BorderLayout.WEST);
+        WebPanel pnlCentral = new WebPanel();
+        pnlCentral.setLayout(new BorderLayout());
+        pnlCentral.add(agregarPanelTagsBusquedaAvanzada(), BorderLayout.NORTH);
+        pnlCentral.add(agregarPanelTablaBusquedaAvanzada(), BorderLayout.CENTER);
+        pnlBusquedaAvanzadaCliente.add(pnlCentral, BorderLayout.CENTER);
+        pnlBusquedaAvanzadaCliente.setBorder(new EmptyBorder((int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025), (int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025)));
+    }
+    
+    private Component agregarPanelParametrosBusquedaAvanzada(){
+        pnlParametros = new WebPanel();
+        parametrosBusquedaAvanzada = new ArrayList<BDO_Atributo_Valor_Cliente>();
+        pnlParametros.setBorder(new TitledBorder("Parámetros de búsqueda"));
+        pnlParametros.setLayout(new BoxLayout(pnlParametros, BoxLayout.PAGE_AXIS));
+        connAtributoValorCliente = new DAO_Atributo_Valor_Cliente();
+        ArrayList<BDO_Atributo_Cliente> atributos = Catalogos.getAtributos_cliente();
+        for(int i=0;i<atributos.size();i++){
+            BDO_Atributo_Cliente atributo = atributos.get(i);
+            WebPanel pnlValores = new WebPanel();
+            pnlValores.setLayout(new FlowLayout());
+            pnlValores.add(new WebLabel(atributo.getNombre()+":"));
+            pnlValores.add(atributo.getCombo(connAtributoValorCliente.valoresAtributo(atributo.getId_atributo_cliente()),columnasDatos, this));
+            pnlParametros.add(pnlValores);
+        }
+        return pnlParametros;
+    }
+    
+    private Component agregarPanelTagsBusquedaAvanzada(){
+        pnlTags = new WebPanel();
+        pnlTags.setLayout(new FlowLayout());
+        pnlTags.setBorder(new TitledBorder("Valores seleccionados"));
+        return pnlTags;
+    }
+    
+    private Component agregarPanelTablaBusquedaAvanzada(){
+        modelBusquedaAvanzada = new ClientesTableModel();
+        modelBusquedaAvanzada.setClientes(Catalogos.getClientes());
+
+        tblBusquedaAvanzada = new WebTable(modelBusquedaAvanzada) {
+
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component component = super.prepareRenderer(renderer, row, column);
+                int rendererWidth = component.getPreferredSize().width;
+                TableColumn tableColumn = getColumnModel().getColumn(column);
+                tableColumn.setPreferredWidth(Math.max(rendererWidth + getIntercellSpacing().width, tableColumn.getPreferredWidth()));
+                return component;
+            }
+        };
+        tblBusquedaAvanzada.setEditable(false);
+        tblBusquedaAvanzada.setAutoResizeMode(WebTable.AUTO_RESIZE_OFF);
+        tblBusquedaAvanzada.setRowSelectionAllowed(true);
+        tblBusquedaAvanzada.setColumnSelectionAllowed(false);
+        tblBusquedaAvanzada.setPreferredScrollableViewportSize(new Dimension(tblBusquedaAvanzada.getPreferredSize().width, (int) (screenSize.height - screenSize.height * 0.65)));
+        tblBusquedaAvanzada.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    WebTable target = (WebTable) e.getSource();
+                    int row = target.getSelectedRow();
+                    int column = 0;
+                    BDO_Cliente buscado = Catalogos.buscarCliente(target.getValueAt(row, column).toString());
+                    actualizarDatos(buscado);
+                    cmbDatosCliente.cargarClientes(Catalogos.getClientes());
+                    cmbDatosCliente.setSelectedItem(buscado.basicsToString());
+                    pnlPestañasCliente.setSelectedIndex(1);
+                }
+            }
+        });
+        WebScrollPane scroll = new WebScrollPane(tblBusquedaAvanzada);
+        return scroll;
+
     }
 
     private Component agregarPanelBotonesDatos() {
@@ -329,12 +416,12 @@ public class FrmCliente extends WebInternalFrame {
     private Component agregarPanelSuperiorDatosCliente() {
         WebPanel pnlSuperiorDatosCliente = new WebPanel();
         pnlSuperiorDatosCliente.setLayout(new FlowLayout());
-        pnlSuperiorDatosCliente.add(new WebLabel(loadIcon("search_accounts.png")));
+        pnlSuperiorDatosCliente.add(new WebLabel(loadIcon("search.png")));
         pnlSuperiorDatosCliente.add(new WebLabel("Buscar cliente:"));
         cmbDatosCliente = new CmbBuscarCliente(this);
         pnlSuperiorDatosCliente.add(cmbDatosCliente);
-        btnEditarCliente = new WebButton("Editar cliente", loadIcon("user_edit.png"));
-        btnNuevoCliente = new WebButton("Nuevo cliente", loadIcon("user_add.png"));
+        btnEditarCliente = new WebButton("Editar cliente", loadIcon("edit.png"));
+        btnNuevoCliente = new WebButton("Nuevo cliente", loadIcon("add.png"));
 
         btnEditarCliente.addActionListener(new ActionListener() {
 
@@ -367,7 +454,7 @@ public class FrmCliente extends WebInternalFrame {
     private Component agregarPanelBusqueda() {
         WebPanel pnlSuperiorConsulta = new WebPanel();
         pnlSuperiorConsulta.setLayout(new FlowLayout());
-        pnlSuperiorConsulta.add(new WebLabel(loadIcon("user_green.png")));
+        pnlSuperiorConsulta.add(new WebLabel(loadIcon("search.png")));
         pnlSuperiorConsulta.add(new WebLabel("Buscar cliente:"));
         cmbConsultaCliente = new CmbBuscarCliente(this);
         pnlSuperiorConsulta.add(cmbConsultaCliente);
@@ -463,6 +550,7 @@ public class FrmCliente extends WebInternalFrame {
             clientes.setClientes(Catalogos.getClientes());
             tblClientes.setModel(clientes);
             tblClientes.repaint();
+            actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
     }
     
     private void actualizarEstados(){
@@ -608,6 +696,34 @@ public class FrmCliente extends WebInternalFrame {
 
 
         return true;
+    }
+
+    public void actualizarDatosBusquedaAvanzada() {
+        connCliente = new DAO_Cliente();
+        modelBusquedaAvanzada.setClientes(connCliente.busquedaAvanzada(parametrosBusquedaAvanzada));
+        modelBusquedaAvanzada.fireTableDataChanged();
+        tblBusquedaAvanzada.repaint();
+    }
+    
+    public void agregarDatosBusquedaAvanzada(int id_atributo_cliente, String valor){
+        BDO_Atributo_Valor_Cliente nuevoAtributo = new BDO_Atributo_Valor_Cliente(valor, null, id_atributo_cliente);
+        parametrosBusquedaAvanzada.add(nuevoAtributo);
+        pnlTags.add(nuevoAtributo.panelTag(this));
+        actualizarDatosBusquedaAvanzada();
+    }
+
+    public void removerDatosBusquedaAvanzada(BDO_Atributo_Cliente atributo, String valor, WebPanel pnlTag) {
+        for(int i=0;i<parametrosBusquedaAvanzada.size();i++){
+            BDO_Atributo_Valor_Cliente parametro = parametrosBusquedaAvanzada.get(i);
+            if(parametro.getAtributo_cliente().getId_atributo_cliente()==atributo.getId_atributo_cliente() &&
+                    parametro.getValor().equals(valor)){
+                parametrosBusquedaAvanzada.remove(i);
+                break;
+            }
+        }
+        pnlTags.remove(pnlTag);
+        pnlTags.repaint();
+        actualizarDatosBusquedaAvanzada();
     }
 
     public class ClientesTableModel extends AbstractTableModel {
