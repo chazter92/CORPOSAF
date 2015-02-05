@@ -6,6 +6,8 @@ package DAO;
 
 import BDO.BDO_Atributo_Valor_Cliente;
 import BDO.BDO_Cliente;
+import BDO.BDO_Estado_Cliente;
+import BDO.BDO_Precio_Cliente;
 import com.alee.laf.optionpane.WebOptionPane;
 import contar.Catalogos;
 import contar.Conexion;
@@ -78,7 +80,7 @@ public class DAO_Cliente {
 
     public void actualizarCliente(BDO_Cliente nuevo, BDO_Cliente antiguo) {
         if (conn.executeQuery("UPDATE CLIENTE SET "
-                + "nit = ?, nombre = ?, direccion = ?, email = ?, "
+                + "nombre = ?, direccion = ?, email = ?, "
                 + "nombre_facturar = ?, telefono = ?, id_lista_precio = ?,"
                 + "id_estado_cliente = ?, id_empresa = ? "
                 + "WHERE nit = ? RETURNING nit", new Object[]{nuevo.getNit(), nuevo.getNombre(), nuevo.getDireccion(),
@@ -101,16 +103,16 @@ public class DAO_Cliente {
         }
     }
 
-    public ArrayList<BDO_Cliente> busquedaAvanzada(ArrayList<BDO_Atributo_Valor_Cliente> parametros) {
+    public ArrayList<BDO_Cliente> busquedaAvanzada(ArrayList<BDO_Atributo_Valor_Cliente> parametros, BDO_Precio_Cliente precio, BDO_Estado_Cliente estado) {
         HashMap<String, BDO_Cliente> clientes = null;
         String condicion = "";        
         ArrayList objDatos = new ArrayList();
         
-        if(parametros.size()>0){
+        if(parametros.size()>0 || precio != null || estado != null){
             condicion = "WHERE ";
         }        
-        
-        for(int i=0;i<parametros.size();i++){
+        int i=0;
+        for(i=0;i<parametros.size();i++){
             if(i>0){
                 condicion += " AND ";
             }
@@ -118,6 +120,24 @@ public class DAO_Cliente {
             objDatos.add(parametros.get(i).getAtributo_cliente().getId_atributo_cliente());
             objDatos.add(parametros.get(i).getValor());
         }
+        
+        if(precio !=null){
+            if(i>0){
+                condicion += " AND ";
+            }
+            condicion += "C.id_lista_precio = ?";
+            objDatos.add(precio.getId_lista_precio());
+            i++;
+        }
+        
+        if(estado !=null){
+            if(i>0){
+                condicion += " AND ";
+            }
+            condicion += "C.id_estado_cliente = ?";
+            objDatos.add(estado.getId_estado_cliente());
+        }
+        
         Object[] datos = objDatos.toArray();
 
         clientes = toBDO(conn.query("SELECT DISTINCT C.* FROM CLIENTE C LEFT JOIN ATRIBUTO_VALOR_CLIENTE A ON C.nit = A.nit " + condicion, datos, datos));

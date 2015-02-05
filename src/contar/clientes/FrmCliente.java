@@ -11,7 +11,6 @@ import BDO.BDO_Estado_Cliente;
 import BDO.BDO_Precio_Cliente;
 import DAO.DAO_Atributo_Valor_Cliente;
 import DAO.DAO_Cliente;
-import com.alee.global.StyleConstants;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.combobox.WebComboBox;
 import com.alee.laf.desktoppane.WebInternalFrame;
@@ -32,15 +31,18 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
@@ -74,6 +76,8 @@ public class FrmCliente extends WebInternalFrame {
     private WebPanel pnlIzquierdo, pnlDerecho, pnlParametros, pnlTags;
     private ClientesTableModel modelBusquedaAvanzada;
     private ArrayList<BDO_Atributo_Valor_Cliente> parametrosBusquedaAvanzada;
+    private BDO_Precio_Cliente precioBusquedaAvanzada;
+    private BDO_Estado_Cliente estadoBusquedaAvanzada;
 
     public ImageIcon loadIcon(final String path) {
         return loadIcon(getClass(), path);
@@ -90,7 +94,7 @@ public class FrmCliente extends WebInternalFrame {
             return new ImageIcon();
         }
     }
-    
+
     public FrmCliente() {
         super("Módulo de clientes", true, true, true, true);
         createUI();
@@ -107,7 +111,7 @@ public class FrmCliente extends WebInternalFrame {
         agregarPestañasCliente();
         add(pnlPestañasCliente);
         setFrameIcon(loadIcon("users_4.png"));
-        addInternalFrameListener(new InternalFrameListener(){
+        addInternalFrameListener(new InternalFrameListener() {
 
             @Override
             public void internalFrameOpened(InternalFrameEvent e) {
@@ -136,16 +140,15 @@ public class FrmCliente extends WebInternalFrame {
 
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {
-                actualizarClientes();
-                actualizarEstados();
-                actualizarPrecios();
+                //actualizarClientes();
+                actualizarEstados(cmbEstadoCliente, false);
+                actualizarPrecios(cmbPrecioCliente, false);
             }
 
             @Override
             public void internalFrameDeactivated(InternalFrameEvent e) {
                 cancelarOperacion();
             }
-            
         });
         pack();
         cancelarOperacion();
@@ -164,7 +167,7 @@ public class FrmCliente extends WebInternalFrame {
         pnlDatosCliente.add(agregarPanelBotonesDatos(), BorderLayout.SOUTH);
         pnlDatosCliente.setBorder(new EmptyBorder((int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025), (int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025)));
     }
-    
+
     private void agregarComponentesBusquedaAvanzada() {
         pnlBusquedaAvanzadaCliente.setLayout(new BorderLayout());
         pnlBusquedaAvanzadaCliente.add(agregarPanelParametrosBusquedaAvanzada(), BorderLayout.WEST);
@@ -175,33 +178,75 @@ public class FrmCliente extends WebInternalFrame {
         pnlBusquedaAvanzadaCliente.add(pnlCentral, BorderLayout.CENTER);
         pnlBusquedaAvanzadaCliente.setBorder(new EmptyBorder((int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025), (int) (screenSize.height * 0.025), (int) (screenSize.width * 0.025)));
     }
-    
-    private Component agregarPanelParametrosBusquedaAvanzada(){
+
+    private Component agregarPanelParametrosBusquedaAvanzada() {
         pnlParametros = new WebPanel();
         parametrosBusquedaAvanzada = new ArrayList<BDO_Atributo_Valor_Cliente>();
         pnlParametros.setBorder(new TitledBorder("Parámetros de búsqueda"));
         pnlParametros.setLayout(new BoxLayout(pnlParametros, BoxLayout.PAGE_AXIS));
         connAtributoValorCliente = new DAO_Atributo_Valor_Cliente();
         ArrayList<BDO_Atributo_Cliente> atributos = Catalogos.getAtributos_cliente();
-        for(int i=0;i<atributos.size();i++){
+        for (int i = 0; i < atributos.size(); i++) {
             BDO_Atributo_Cliente atributo = atributos.get(i);
             WebPanel pnlValores = new WebPanel();
             pnlValores.setLayout(new FlowLayout());
-            pnlValores.add(new WebLabel(atributo.getNombre()+":"));
-            pnlValores.add(atributo.getCombo(connAtributoValorCliente.valoresAtributo(atributo.getId_atributo_cliente()),columnasDatos, this));
+            pnlValores.add(new WebLabel(atributo.getNombre() + ":"));
+            pnlValores.add(atributo.getCombo(connAtributoValorCliente.valoresAtributo(atributo.getId_atributo_cliente()), columnasDatos, this));
             pnlParametros.add(pnlValores);
         }
+
+        WebPanel pnlTipoCliente = new WebPanel();
+        pnlTipoCliente.setLayout(new FlowLayout());
+        pnlTipoCliente.add(new WebLabel("Descuento:"));
+        WebComboBox cmbTipoClienteBusqueda = new WebComboBox();
+        cmbTipoClienteBusqueda.setEditorColumns(columnasDatos);
+        cmbTipoClienteBusqueda = actualizarPrecios(cmbTipoClienteBusqueda, true);
+        cmbTipoClienteBusqueda.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    WebComboBox localCombo = (WebComboBox) e.getSource();
+                    if (localCombo.getSelectedIndex() != 0) {
+                        agregarDatosBusquedaAvanzada(Catalogos.buscarPrecioCliente(localCombo.getSelectedItem().toString()));
+                    }
+                }
+            }
+        });
+        pnlTipoCliente.add(cmbTipoClienteBusqueda);
+        pnlParametros.add(pnlTipoCliente);
+
+        WebPanel pnlEstadoCliente = new WebPanel();
+        pnlEstadoCliente.setLayout(new FlowLayout());
+        pnlEstadoCliente.add(new WebLabel("Estado:"));
+        WebComboBox cmbEstadoClienteBusqueda = new WebComboBox();
+        cmbEstadoClienteBusqueda.setEditorColumns(columnasDatos);
+        cmbEstadoClienteBusqueda = actualizarEstados(cmbEstadoClienteBusqueda, true);
+        cmbEstadoClienteBusqueda.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    WebComboBox localCombo = (WebComboBox) e.getSource();
+                    if (localCombo.getSelectedIndex() != 0) {
+                        agregarDatosBusquedaAvanzada(Catalogos.buscarEstadoCliente(localCombo.getSelectedItem().toString()));
+                    }
+                }
+            }
+        });
+        pnlEstadoCliente.add(cmbEstadoClienteBusqueda);
+        pnlParametros.add(pnlEstadoCliente);
         return pnlParametros;
     }
-    
-    private Component agregarPanelTagsBusquedaAvanzada(){
+
+    private Component agregarPanelTagsBusquedaAvanzada() {
         pnlTags = new WebPanel();
         pnlTags.setLayout(new FlowLayout());
         pnlTags.setBorder(new TitledBorder("Valores seleccionados"));
         return pnlTags;
     }
-    
-    private Component agregarPanelTablaBusquedaAvanzada(){
+
+    private Component agregarPanelTablaBusquedaAvanzada() {
         modelBusquedaAvanzada = new ClientesTableModel();
         modelBusquedaAvanzada.setClientes(Catalogos.getClientes());
 
@@ -360,11 +405,8 @@ public class FrmCliente extends WebInternalFrame {
         cmbPrecioCliente = new WebComboBox();
         cmbPrecioCliente.setEditable(false);
         cmbPrecioCliente.setEditorColumns(columnasDatos);
-        cmbPrecioCliente.removeAllItems();
-        ArrayList<BDO_Precio_Cliente> preciosCliente = Catalogos.getPrecios_cliente();
-        for (int i = 0; i < preciosCliente.size(); i++) {
-            cmbPrecioCliente.addItem(preciosCliente.get(i).basicsToString());
-        }
+        cmbPrecioCliente = actualizarPrecios(cmbPrecioCliente, false);
+       
         WebPanel pnlTipoCliente = new WebPanel();
         pnlTipoCliente.setLayout(new FlowLayout());
         pnlTipoCliente.add(new WebLabel(loadIcon("users_5.png")));
@@ -376,11 +418,8 @@ public class FrmCliente extends WebInternalFrame {
         cmbEstadoCliente = new WebComboBox();
         cmbEstadoCliente.setEditable(false);
         cmbEstadoCliente.setEditorColumns(columnasDatos);
-        cmbEstadoCliente.removeAllItems();
-        ArrayList<BDO_Estado_Cliente> estadosCliente = Catalogos.getEstados_cliente();
-        for (int i = 0; i < estadosCliente.size(); i++) {
-            cmbEstadoCliente.addItem(estadosCliente.get(i).basicsToString());
-        }
+        cmbEstadoCliente = actualizarEstados(cmbEstadoCliente, false);
+        
         WebPanel pnlEstadoCliente = new WebPanel();
         pnlEstadoCliente.setLayout(new FlowLayout());
         pnlEstadoCliente.add(new WebLabel(loadIcon("user_delete.png")));
@@ -388,23 +427,23 @@ public class FrmCliente extends WebInternalFrame {
         TooltipManager.setTooltip(pnlEstadoCliente, "Seleccione el estado del cliente", TooltipWay.up);
         cmbEstadoCliente.setToolTipText("Seleccione el estado del cliente");
         pnlDerecho.add(pnlEstadoCliente);
-        
-        
+
+
         if (clienteSeleccionado != null) {
             clienteSeleccionado.cargarAtributos();
             ArrayList<BDO_Atributo_Valor_Cliente> atributos = clienteSeleccionado.getAtributos();
-            if(atributos != null){
-            for(int i=0; i<atributos.size();i++){
-                if(i%2 == 0){
-                    pnlDerecho.add(atributos.get(i).toPanel(columnasDatos));
-                }else{
-                    pnlIzquierdo.add(atributos.get(i).toPanel(columnasDatos));
+            if (atributos != null) {
+                for (int i = 0; i < atributos.size(); i++) {
+                    if (i % 2 == 0) {
+                        pnlDerecho.add(atributos.get(i).toPanel(columnasDatos));
+                    } else {
+                        pnlIzquierdo.add(atributos.get(i).toPanel(columnasDatos));
+                    }
                 }
             }
-            }
         }
-        
-        
+
+
         pnlDatosIndividuales.add(pnlIzquierdo);
         pnlDatosIndividuales.add(pnlDerecho);
         scrDatos = new WebScrollPane(pnlDatosIndividuales);
@@ -516,6 +555,7 @@ public class FrmCliente extends WebInternalFrame {
     public void editarCliente() {
         editarCliente = true;
         cambiarBloqueoCampos(true);
+        txtNit.setEditable(false);
     }
 
     public void guardarCliente() {
@@ -525,7 +565,7 @@ public class FrmCliente extends WebInternalFrame {
             BDO_Cliente nuevo = new BDO_Cliente(txtNit.getText().trim(), txtNombre.getText().trim(),
                     txtDireccion.getText().trim(), txtEmail.getText().trim(), txtNombreFacturar.getText().trim(),
                     txtTelefono.getText().trim(), Integer.parseInt(cmbPrecioCliente.getSelectedItem().toString().split(" | ")[0]),
-                    Integer.parseInt(cmbEstadoCliente.getSelectedItem().toString().split(" | ")[0]),cmbDatosCliente.getClienteSeleccionado().getAtributos());
+                    Integer.parseInt(cmbEstadoCliente.getSelectedItem().toString().split(" | ")[0]), cmbDatosCliente.getClienteSeleccionado().getAtributos());
             if (editarCliente) {
                 connCliente.actualizarCliente(nuevo, cmbDatosCliente.getClienteSeleccionado());
             } else {
@@ -537,42 +577,64 @@ public class FrmCliente extends WebInternalFrame {
             actualizarClientes();
         }
     }
-    
-    private void actualizarClientes(){
-            Catalogos.actualizarClientes();
-            String seleccionado = cmbDatosCliente.getSelectedItem().toString();
-            cmbDatosCliente.cargarClientes(Catalogos.getClientes());
-            cmbDatosCliente.setSelectedItem(seleccionado);
-            seleccionado = cmbConsultaCliente.getSelectedItem().toString();
-            cmbConsultaCliente.cargarClientes(Catalogos.getClientes());
-            cmbConsultaCliente.setSelectedItem(seleccionado);
-            ClientesTableModel clientes = new ClientesTableModel();
-            clientes.setClientes(Catalogos.getClientes());
-            tblClientes.setModel(clientes);
-            tblClientes.repaint();
-            actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
+
+    private void actualizarClientes() {
+        Catalogos.actualizarClientes();
+        String seleccionado = cmbDatosCliente.getSelectedItem().toString();
+        cmbDatosCliente.cargarClientes(Catalogos.getClientes());
+        cmbDatosCliente.setSelectedItem(seleccionado);
+        seleccionado = cmbConsultaCliente.getSelectedItem().toString();
+        cmbConsultaCliente.cargarClientes(Catalogos.getClientes());
+        cmbConsultaCliente.setSelectedItem(seleccionado);
+        ClientesTableModel clientes = new ClientesTableModel();
+        clientes.setClientes(Catalogos.getClientes());
+        tblClientes.setModel(clientes);
+        tblClientes.repaint();
+        actualizarDatos(cmbDatosCliente.getClienteSeleccionado());
     }
-    
-    private void actualizarEstados(){
-        String seleccionado = cmbEstadoCliente.getSelectedItem().toString();
-        cmbEstadoCliente.removeAllItems();
+
+    private WebComboBox actualizarEstados(WebComboBox cmbEstados, boolean opcion) {
+        String seleccionado = null;
+        if (cmbEstados.getSelectedItem() != null) {
+            seleccionado = cmbEstados.getSelectedItem().toString();
+        }
+        cmbEstados.removeAllItems();
+        if (opcion) {
+            cmbEstados.addItem("Seleccione una opción");
+        }
         ArrayList<BDO_Estado_Cliente> estadosCliente = Catalogos.getEstados_cliente();
         for (int i = 0; i < estadosCliente.size(); i++) {
-            cmbEstadoCliente.addItem(estadosCliente.get(i).basicsToString());
+            cmbEstados.addItem(estadosCliente.get(i).basicsToString());
         }
-        cmbEstadoCliente.repaint();        
-        cmbEstadoCliente.setSelectedItem(seleccionado);
+        cmbEstados.repaint();
+        if (seleccionado == null) {
+            cmbEstados.setSelectedIndex(0);
+        } else {
+            cmbEstados.setSelectedItem(seleccionado);
+        }
+        return cmbEstados;
     }
     
-    private void actualizarPrecios(){
-        String seleccionado = cmbPrecioCliente.getSelectedItem().toString();
-        cmbPrecioCliente.removeAllItems();
+    private WebComboBox actualizarPrecios(WebComboBox cmbPrecios, boolean opcion) {
+        String seleccionado = null;
+        if (cmbPrecios.getSelectedItem() != null) {
+            seleccionado = cmbPrecios.getSelectedItem().toString();
+        }
+        cmbPrecios.removeAllItems();
+        if (opcion) {
+            cmbPrecios.addItem("Seleccione una opción");
+        }
         ArrayList<BDO_Precio_Cliente> preciosCliente = Catalogos.getPrecios_cliente();
         for (int i = 0; i < preciosCliente.size(); i++) {
-            cmbPrecioCliente.addItem(preciosCliente.get(i).basicsToString());
+            cmbPrecios.addItem(preciosCliente.get(i).basicsToString());
         }
-        cmbPrecioCliente.repaint(); 
-        cmbPrecioCliente.setSelectedItem(seleccionado);
+        cmbPrecios.repaint();
+        if (seleccionado == null) {
+            cmbPrecios.setSelectedIndex(0);
+        } else {
+            cmbPrecios.setSelectedItem(seleccionado);
+        }
+        return cmbPrecios;
     }
 
     public void cancelarOperacion() {
@@ -584,10 +646,10 @@ public class FrmCliente extends WebInternalFrame {
     public void actualizarDatos(BDO_Cliente clienteSeleccionado) {
         if (clienteSeleccionado != null) {
             BorderLayout lyt = (BorderLayout) pnlDatosCliente.getLayout();
-            if(lyt.getLayoutComponent(BorderLayout.CENTER) != null){
+            if (lyt.getLayoutComponent(BorderLayout.CENTER) != null) {
                 pnlDatosCliente.remove(lyt.getLayoutComponent(BorderLayout.CENTER));
             }
-            
+
             pnlDatosCliente.add(agregarDatosIndividualesCliente(clienteSeleccionado), BorderLayout.CENTER);
             txtNit.setText(clienteSeleccionado.getNit());
             txtNombre.setText(clienteSeleccionado.getNombre());
@@ -617,18 +679,18 @@ public class FrmCliente extends WebInternalFrame {
         cmbDatosCliente.setEnabled(!bloqueo);
         btnGuardarCliente.setEnabled(bloqueo);
         btnCancelar.setEnabled(bloqueo);
-        
-       
-        
-        for(int i =0;i<pnlIzquierdo.getComponentCount();i++){
+
+
+
+        for (int i = 0; i < pnlIzquierdo.getComponentCount(); i++) {
             WebPanel pnlIz = (WebPanel) pnlIzquierdo.getComponent(i);
-            for (Component c : pnlIz.getComponents()){
+            for (Component c : pnlIz.getComponents()) {
                 c.setEnabled(bloqueo);
             }
         }
-        for(int i =0;i<pnlDerecho.getComponentCount();i++){
+        for (int i = 0; i < pnlDerecho.getComponentCount(); i++) {
             WebPanel pnlIz = (WebPanel) pnlDerecho.getComponent(i);
-             for (Component c : pnlIz.getComponents()){
+            for (Component c : pnlIz.getComponents()) {
                 c.setEnabled(bloqueo);
             }
         }
@@ -644,7 +706,7 @@ public class FrmCliente extends WebInternalFrame {
     }
 
     private void nuevoCliente() {
-        editarCliente = false;        
+        editarCliente = false;
         cambiarBloqueoCampos(true);
         limpiarCampos();
     }
@@ -654,7 +716,7 @@ public class FrmCliente extends WebInternalFrame {
             Catalogos.mostrarMensajeError("El campo NIT no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
             return false;
         } else {
-            if (Catalogos.buscarCliente(txtNit.getText().trim()) == null || ( Catalogos.buscarCliente(txtNit.getText().trim()).getNit().equals(cmbDatosCliente.getClienteSeleccionado().getNit()) && editarCliente)) {
+            if (Catalogos.buscarCliente(txtNit.getText().trim()) == null || (Catalogos.buscarCliente(txtNit.getText().trim()).getNit().equals(cmbDatosCliente.getClienteSeleccionado().getNit()) && editarCliente)) {
                 Validar_Nit nit = new Validar_Nit();
                 if (!nit.valirdarNit(txtNit.getText().trim())) {
                     if (WebOptionPane.showOptionDialog(null, "El NIT ingresado no es válido. ¿Desea continuar?", "NIT no válido", WebOptionPane.YES_NO_OPTION, WebOptionPane.QUESTION_MESSAGE, null, new Object[]{"Sí", "No"}, "No") == 1) {
@@ -663,7 +725,7 @@ public class FrmCliente extends WebInternalFrame {
                         return false;
                     }
 
-                }else{
+                } else {
                     return false;
                 }
             } else {
@@ -700,12 +762,100 @@ public class FrmCliente extends WebInternalFrame {
 
     public void actualizarDatosBusquedaAvanzada() {
         connCliente = new DAO_Cliente();
-        modelBusquedaAvanzada.setClientes(connCliente.busquedaAvanzada(parametrosBusquedaAvanzada));
+        modelBusquedaAvanzada.setClientes(connCliente.busquedaAvanzada(parametrosBusquedaAvanzada, precioBusquedaAvanzada, estadoBusquedaAvanzada));
         modelBusquedaAvanzada.fireTableDataChanged();
         tblBusquedaAvanzada.repaint();
     }
-    
-    public void agregarDatosBusquedaAvanzada(int id_atributo_cliente, String valor){
+
+    public void agregarDatosBusquedaAvanzada(BDO_Precio_Cliente precio) {
+        precioBusquedaAvanzada = precio;
+        pnlTags.add(panelTag(precioBusquedaAvanzada));
+        actualizarDatosBusquedaAvanzada();
+    }
+
+    public void agregarDatosBusquedaAvanzada(BDO_Estado_Cliente estado) {
+        estadoBusquedaAvanzada = estado;
+        pnlTags.add(panelTag(estadoBusquedaAvanzada));
+        actualizarDatosBusquedaAvanzada();
+    }
+
+    public Component panelTag(final BDO_Precio_Cliente precio) {
+        final WebPanel pnlTag = new WebPanel();
+        pnlTag.setLayout(new FlowLayout());
+        WebLabel lblTitulo = new WebLabel("Descuento:");
+        lblTitulo.setBoldFont(true);
+        pnlTag.add(lblTitulo);
+        WebLabel lblValor = new WebLabel(precio.getTipo() + "(" + precio.getDescuento() + "%)");
+        pnlTag.add(lblValor);
+
+        WebLabel lblIcono = new WebLabel(loadIcon("button-close.png"));
+        lblIcono.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                removerDatosBusquedaAvanzada(precio, pnlTag);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+        pnlTag.add(lblIcono);
+        pnlTag.setBorder(new BevelBorder(BevelBorder.RAISED));
+        return pnlTag;
+    }
+
+    public Component panelTag(final BDO_Estado_Cliente estado) {
+        final WebPanel pnlTag = new WebPanel();
+        pnlTag.setLayout(new FlowLayout());
+        WebLabel lblTitulo = new WebLabel("Estado:");
+        lblTitulo.setBoldFont(true);
+        pnlTag.add(lblTitulo);
+        WebLabel lblValor = new WebLabel(estado.getTipo());
+        pnlTag.add(lblValor);
+
+        WebLabel lblIcono = new WebLabel(loadIcon("button-close.png"));
+        lblIcono.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                removerDatosBusquedaAvanzada(estado, pnlTag);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
+        pnlTag.add(lblIcono);
+        pnlTag.setBorder(new BevelBorder(BevelBorder.RAISED));
+        return pnlTag;
+    }
+
+    public void agregarDatosBusquedaAvanzada(int id_atributo_cliente, String valor) {
         BDO_Atributo_Valor_Cliente nuevoAtributo = new BDO_Atributo_Valor_Cliente(valor, null, id_atributo_cliente);
         parametrosBusquedaAvanzada.add(nuevoAtributo);
         pnlTags.add(nuevoAtributo.panelTag(this));
@@ -713,14 +863,28 @@ public class FrmCliente extends WebInternalFrame {
     }
 
     public void removerDatosBusquedaAvanzada(BDO_Atributo_Cliente atributo, String valor, WebPanel pnlTag) {
-        for(int i=0;i<parametrosBusquedaAvanzada.size();i++){
+        for (int i = 0; i < parametrosBusquedaAvanzada.size(); i++) {
             BDO_Atributo_Valor_Cliente parametro = parametrosBusquedaAvanzada.get(i);
-            if(parametro.getAtributo_cliente().getId_atributo_cliente()==atributo.getId_atributo_cliente() &&
-                    parametro.getValor().equals(valor)){
+            if (parametro.getAtributo_cliente().getId_atributo_cliente() == atributo.getId_atributo_cliente()
+                    && parametro.getValor().equals(valor)) {
                 parametrosBusquedaAvanzada.remove(i);
                 break;
             }
         }
+        pnlTags.remove(pnlTag);
+        pnlTags.repaint();
+        actualizarDatosBusquedaAvanzada();
+    }
+
+    public void removerDatosBusquedaAvanzada(BDO_Precio_Cliente precio, WebPanel pnlTag) {
+        precioBusquedaAvanzada = null;
+        pnlTags.remove(pnlTag);
+        pnlTags.repaint();
+        actualizarDatosBusquedaAvanzada();
+    }
+
+    public void removerDatosBusquedaAvanzada(BDO_Estado_Cliente estado, WebPanel pnlTag) {
+        estadoBusquedaAvanzada = null;
         pnlTags.remove(pnlTag);
         pnlTags.repaint();
         actualizarDatosBusquedaAvanzada();

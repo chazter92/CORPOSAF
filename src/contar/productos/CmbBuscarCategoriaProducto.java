@@ -110,9 +110,11 @@ public class CmbBuscarCategoriaProducto extends WebComboBox{
     }
     
     public void cargarCategoriasProducto(ArrayList<BDO_Categoria_Producto> categoriasEncontradas) {
-        removeAllItems();
-        for (int i = 0; i < categoriasEncontradas.size(); i++) {
-            addItem(categoriasEncontradas.get(i).basicsToString());
+        if (categoriasEncontradas != null) {
+            removeAllItems();
+            for (int i = 0; i < categoriasEncontradas.size(); i++) {
+                addItem(categoriasEncontradas.get(i).basicsToString());
+            }
         }        
     }
 

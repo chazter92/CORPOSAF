@@ -199,8 +199,8 @@ public class FrmAtributoCliente extends WebInternalFrame{
         pnlSuperiorDatosCliente.add(new WebLabel("Buscar:"));
         cmbAtributosCliente = new CmbBuscarAtributoCliente(this);
         pnlSuperiorDatosCliente.add(cmbAtributosCliente);
-        btnEditar = new WebButton("Editar estado", loadIcon("edit.png"));
-        btnNuevo = new WebButton("Nuevo estado", loadIcon("add.png"));
+        btnEditar = new WebButton("Editar atributo", loadIcon("edit.png"));
+        btnNuevo = new WebButton("Nuevo atributo", loadIcon("add.png"));
 
         btnEditar.addActionListener(new ActionListener() {
 

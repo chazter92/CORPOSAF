@@ -113,10 +113,12 @@ public class CmbBuscarAtributoCliente extends WebComboBox{
     }
     
     public void cargarAtributoCliente(ArrayList<BDO_Atributo_Cliente> atributosEncontrados) {
-        removeAllItems();
-        for (int i = 0; i < atributosEncontrados.size(); i++) {
-            addItem(atributosEncontrados.get(i).basicsToString());
-        }        
+        if (atributosEncontrados != null) {
+            removeAllItems();
+            for (int i = 0; i < atributosEncontrados.size(); i++) {
+                addItem(atributosEncontrados.get(i).basicsToString());
+            }
+        }       
     }
 
     public BDO_Atributo_Cliente getAtributoSeleccionado() {

@@ -68,6 +68,7 @@ public class BDO_Atributo_Cliente {
                     WebComboBox localCombo = (WebComboBox)e.getSource();
                     if(localCombo.getSelectedIndex() != 0){
                         ventana.agregarDatosBusquedaAvanzada(id_atributo_cliente, localCombo.getSelectedItem().toString());
+                        localCombo.setSelectedIndex(0);
                     }
                 }
             }

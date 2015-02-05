@@ -29,7 +29,7 @@ public class Validar_Double extends FocusAdapter {
         }
     }
 
-    private boolean valirdarDouble(String ingresado) {
+    public boolean valirdarDouble(String ingresado) {
         if(ingresado.matches("^\\d+(\\.\\d+)?")){
             return true;
         }        

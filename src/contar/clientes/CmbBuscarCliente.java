@@ -110,9 +110,11 @@ public class CmbBuscarCliente extends WebComboBox {
     }
     
     public void cargarClientes(ArrayList<BDO_Cliente> clientesEncontrados) {
-        removeAllItems();
-        for (int i = 0; i < clientesEncontrados.size(); i++) {
-            addItem(clientesEncontrados.get(i).basicsToString());
+        if (clientesEncontrados != null) {
+            removeAllItems();
+            for (int i = 0; i < clientesEncontrados.size(); i++) {
+                addItem(clientesEncontrados.get(i).basicsToString());
+            }
         }        
     }
 

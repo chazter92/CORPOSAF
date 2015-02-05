@@ -11,8 +11,6 @@ import contar.Catalogos;
 import contar.Conexion;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sql.RowSet;
 
 /**

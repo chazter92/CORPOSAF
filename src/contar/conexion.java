@@ -6,14 +6,18 @@ package contar;
 
 import com.alee.laf.optionpane.WebOptionPane;
 import com.sun.rowset.CachedRowSetImpl;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.imageio.ImageIO;
 import javax.sql.rowset.CachedRowSet;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -69,6 +73,10 @@ public class Conexion {
                         sqlType = java.sql.Types.NUMERIC;
                     } else if (clase.equalsIgnoreCase("Boolean")) {
                         sqlType = java.sql.Types.BOOLEAN;
+                    }else if (clase.equalsIgnoreCase("BigDecimal")){
+                        sqlType = java.sql.Types.NUMERIC;
+                    }else if (clase.equalsIgnoreCase("ImageIcon")){
+                        sqlType = java.sql.Types.VARBINARY;
                     }
 
                     ps.setNull(i + 1, sqlType);
@@ -81,7 +89,13 @@ public class Conexion {
                         ps.setDouble(i + 1, Double.parseDouble(datos[i].toString()));
                     } else if (clase.equalsIgnoreCase("Boolean")) {
                         ps.setBoolean(i + 1, Boolean.parseBoolean(datos[i].toString()));
-                    } else {
+                    } else if (clase.equalsIgnoreCase("BigDecimal")){
+                        ps.setDouble(i+1, Double.parseDouble(datos[i].toString()));
+                    } else if (clase.equalsIgnoreCase("ImageIcon")){
+                        File file = new File(guardarArchivoImagen((Image)datos[i]));
+                        FileInputStream fis = new FileInputStream(file);
+                        ps.setBinaryStream(i+1, fis,(int) file.length());
+                    }else{
                         ps.setString(i + 1, datos[i].toString());
                     }
                 }
@@ -124,6 +138,10 @@ public class Conexion {
                         sqlType = java.sql.Types.NUMERIC;
                     } else if (clase.equalsIgnoreCase("Boolean")) {
                         sqlType = java.sql.Types.BOOLEAN;
+                    }else if (clase.equalsIgnoreCase("BigDecimal")){
+                        sqlType = java.sql.Types.NUMERIC;
+                    }else if (clase.equalsIgnoreCase("ImageIcon")){
+                        sqlType = java.sql.Types.VARBINARY;
                     }
 
                     ps.setNull(i + 1, sqlType);
@@ -136,7 +154,13 @@ public class Conexion {
                         ps.setDouble(i + 1, Double.parseDouble(datos[i].toString()));
                     } else if (clase.equalsIgnoreCase("Boolean")) {
                         ps.setBoolean(i + 1, Boolean.parseBoolean(datos[i].toString()));
-                    } else {
+                    } else if (clase.equalsIgnoreCase("BigDecimal")){
+                        ps.setDouble(i+1, Double.parseDouble(datos[i].toString()));
+                    } else if (clase.equalsIgnoreCase("ImageIcon")){
+                        File file = new File(guardarArchivoImagen((Image)datos[i]));
+                        FileInputStream fis = new FileInputStream(file);
+                        ps.setBinaryStream(i+1, fis,(int) file.length());
+                    }else{
                         ps.setString(i + 1, datos[i].toString());
                     }
                 }
@@ -215,5 +239,22 @@ public class Conexion {
 
     private void mostrarError(String message) {
         Catalogos.mostrarMensajeError(message, "Error", WebOptionPane.ERROR_MESSAGE);
+    }
+    
+    private String guardarArchivoImagen(Image foto){
+        String ruta = "img.jpg";
+        if (foto != null) {
+            BufferedImage bi = new BufferedImage(foto.getWidth(null), foto.getHeight(null), BufferedImage.TYPE_INT_RGB);
+
+            Graphics2D g2 = bi.createGraphics();
+            g2.drawImage(foto, 0, 0, null);
+            g2.dispose();
+            try {
+                ImageIO.write(bi, "jpg", new File(ruta));
+            } catch (IOException ex) {
+                System.out.println(ex);
+            }
+        }
+        return ruta;
     }
 }

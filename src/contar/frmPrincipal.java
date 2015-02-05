@@ -24,7 +24,11 @@ import com.alee.managers.tooltip.TooltipManager;
 import contar.clientes.FrmAtributoCliente;
 import contar.clientes.FrmEstadoCliente;
 import contar.clientes.FrmPrecioCliente;
+import contar.empresa.FrmImpuesto;
 import contar.productos.FrmCategoriaProducto;
+import contar.productos.FrmAtributoProducto;
+import contar.productos.FrmEstadoProducto;
+import contar.productos.FrmProducto;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -87,11 +91,15 @@ public class FrmPrincipal extends WebFrame {
         createSimpleFrame("Modificar producto", "Modificar un producto o dar de baja", 125, productosDesktop, Color.BLACK);
         createSimpleFrame("Precios de venta", "Agregar precios de venta a los productos", 225, productosDesktop, Color.BLACK);
         HotkeyManager.installShowAllHotkeysAction ( getRootPane (), Hotkey.F1 );
+        crearModuloImpuestos();
         crearModuloClientes();
         crearModuloEstadoClientes();
         crearModuloPrecioClientes();
         crearModuloCategoriasProducto();
         crearModuloAtributosCliente();
+        crearModuloAtributosProducto();
+        crearModuloProductos();
+        crearModuloEstadosProducto();
         contentPane.add(agregarBarraEstado(), BorderLayout.SOUTH);
         contentPane.add(agregarPestañas(), BorderLayout.CENTER);
         setSize(screenSize.width-100,screenSize.height-100);
@@ -139,6 +147,14 @@ public class FrmPrincipal extends WebFrame {
         }
     }
     
+    private void crearModuloEstadosProducto(){
+        agregarBtnFrmEstadoProducto(225,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloAtributosProducto(){
+        agregarBtnFrmAtributoProducto(25,desktopPane, Color.WHITE);
+    }
+    
     private void crearModuloClientes(){
         agregarBtnFrmCliente(25,desktopPane, Color.WHITE);
     }
@@ -157,6 +173,146 @@ public class FrmPrincipal extends WebFrame {
     
     private void crearModuloCategoriasProducto(){
         agregarBtnFrmCategoriaProducto(325,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloImpuestos(){
+        agregarBtnFrmImpuesto(125,desktopPane, Color.WHITE);
+    }
+    
+    private void crearModuloProductos(){
+        agregarBtnFrmProducto(325,desktopPane, Color.WHITE);
+    }
+    
+    private void agregarBtnFrmEstadoProducto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmEstadoProducto frmEstadoProducto = new FrmEstadoProducto();
+        final WebButton btnFrmEstadoProducto = new WebButton ( "Estados de producto", loadIcon ( "account_menu.png" ) );
+        TooltipManager.setTooltip(btnFrmEstadoProducto, "Estados de producto", TooltipWay.down);
+        btnFrmEstadoProducto.setForeground(colorFuente);
+        btnFrmEstadoProducto.setRolloverDecoratedOnly ( true );
+        btnFrmEstadoProducto.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmEstadoProducto.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmEstadoProducto.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmEstadoProducto.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmEstadoProducto.isClosed () )
+                {
+                    if ( frmEstadoProducto.getParent () == null )
+                    {
+                        desktopPane.add ( frmEstadoProducto );
+                    }
+                    frmEstadoProducto.open ();
+                    frmEstadoProducto.pack();
+                    frmEstadoProducto.setIcon ( false );
+                }
+                else
+                {
+                    frmEstadoProducto.setIcon ( !frmEstadoProducto.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmEstadoProducto.addMouseListener ( moveAdapter1 );
+        btnFrmEstadoProducto.addMouseMotionListener ( moveAdapter1 );
+        btnFrmEstadoProducto.setBounds ( 95, posY, 120, 75 );
+        desktopPane.add(btnFrmEstadoProducto);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmEstadoProducto.setLocation(20,20);
+        frmEstadoProducto.pack();
+        frmEstadoProducto.close();
+    }
+    
+    private void agregarBtnFrmProducto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmProducto frmProducto = new FrmProducto();
+        final WebButton btnFrmProducto = new WebButton ( "Productos", loadIcon ( "package.png" ) );
+        TooltipManager.setTooltip(btnFrmProducto, "Productos", TooltipWay.down);
+        btnFrmProducto.setForeground(colorFuente);
+        btnFrmProducto.setRolloverDecoratedOnly ( true );
+        btnFrmProducto.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmProducto.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmProducto.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmProducto.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmProducto.isClosed () )
+                {
+                    if ( frmProducto.getParent () == null )
+                    {
+                        desktopPane.add ( frmProducto );
+                    }
+                    frmProducto.open ();
+                    frmProducto.pack();
+                    frmProducto.setIcon ( false );
+                }
+                else
+                {
+                    frmProducto.setIcon ( !frmProducto.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmProducto.addMouseListener ( moveAdapter1 );
+        btnFrmProducto.addMouseMotionListener ( moveAdapter1 );
+        btnFrmProducto.setBounds ( 95, posY, 120, 75 );
+        desktopPane.add(btnFrmProducto);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmProducto.setLocation(20,20);
+        frmProducto.pack();
+        frmProducto.close();
+    }
+    
+    private void agregarBtnFrmImpuesto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmImpuesto frmImpuesto = new FrmImpuesto();
+        final WebButton btnFrmImpuesto = new WebButton ( "Impuestos", loadIcon ( "impuesto.png" ) );
+        TooltipManager.setTooltip(btnFrmImpuesto, "Impuestos", TooltipWay.down);
+        btnFrmImpuesto.setForeground(colorFuente);
+        btnFrmImpuesto.setRolloverDecoratedOnly ( true );
+        btnFrmImpuesto.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmImpuesto.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmImpuesto.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmImpuesto.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmImpuesto.isClosed () )
+                {
+                    if ( frmImpuesto.getParent () == null )
+                    {
+                        desktopPane.add ( frmImpuesto );
+                    }
+                    frmImpuesto.open ();
+                    frmImpuesto.pack();
+                    frmImpuesto.setIcon ( false );
+                }
+                else
+                {
+                    frmImpuesto.setIcon ( !frmImpuesto.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmImpuesto.addMouseListener ( moveAdapter1 );
+        btnFrmImpuesto.addMouseMotionListener ( moveAdapter1 );
+        btnFrmImpuesto.setBounds ( 95, posY, 120, 75 );
+        desktopPane.add(btnFrmImpuesto);
+        //frmCliente.setBounds(25,15,(int)(screenSize.width-screenSize.width*0.25), (int)(screenSize.height - screenSize.height*0.3));
+        frmImpuesto.setLocation(20,20);
+        frmImpuesto.pack();
+        frmImpuesto.close();
     }
     
     private void agregarBtnFrmCategoriaProducto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
@@ -377,6 +533,49 @@ public class FrmPrincipal extends WebFrame {
         frmCliente.setLocation(20,20);
         frmCliente.pack();
         frmCliente.close();
+    }
+    
+    private void agregarBtnFrmAtributoProducto(int posY, final WebDesktopPane desktopPane, Color colorFuente){
+        final FrmAtributoProducto frmAtributoProducto = new FrmAtributoProducto();
+        final WebButton btnFrmAtributoProducto = new WebButton ( "Atributos de los productos", loadIcon ( "categories.png" ) );
+        TooltipManager.setTooltip(btnFrmAtributoProducto, "Atributos de productos", TooltipWay.down);
+        btnFrmAtributoProducto.setForeground(colorFuente);
+        btnFrmAtributoProducto.setRolloverDecoratedOnly ( true );
+        btnFrmAtributoProducto.setHorizontalTextPosition ( WebButton.CENTER );
+        btnFrmAtributoProducto.setVerticalTextPosition ( WebButton.BOTTOM );
+        btnFrmAtributoProducto.addActionListener ( new ActionListener ()
+        {
+            @Override
+            public void actionPerformed ( ActionEvent e )
+            {
+                if ( btnFrmAtributoProducto.getClientProperty ( DesktopPaneIconMoveAdapter.DRAGGED_MARK ) != null )
+                {
+                    return;
+                }
+                if ( frmAtributoProducto.isClosed () )
+                {
+                    if ( frmAtributoProducto.getParent () == null )
+                    {
+                        desktopPane.add ( frmAtributoProducto );
+                    }
+                    frmAtributoProducto.open ();
+                    frmAtributoProducto.pack();
+                    frmAtributoProducto.setIcon ( false );
+                }
+                else
+                {
+                    frmAtributoProducto.setIcon ( !frmAtributoProducto.isIcon () );
+                }
+            }
+        } );
+        DesktopPaneIconMoveAdapter moveAdapter1 = new DesktopPaneIconMoveAdapter ();
+        btnFrmAtributoProducto.addMouseListener ( moveAdapter1 );
+        btnFrmAtributoProducto.addMouseMotionListener ( moveAdapter1 );
+        btnFrmAtributoProducto.setBounds ( 95, posY, 120, 75 );
+        desktopPane.add(btnFrmAtributoProducto);
+        frmAtributoProducto.setLocation(20,20);
+        frmAtributoProducto.pack();
+        frmAtributoProducto.close();
     }
     
     private void createSimpleFrame ( String titulo, final String mensaje, int posY, final WebDesktopPane desktopPane, Color colorFuente )

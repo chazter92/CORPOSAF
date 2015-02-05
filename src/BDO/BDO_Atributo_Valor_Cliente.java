@@ -92,33 +92,28 @@ public class BDO_Atributo_Valor_Cliente {
         pnlTag.add(lblValor);
 
         WebLabel lblIcono = new WebLabel(loadIcon("button-close.png"));
-        lblIcono.addMouseListener(new MouseListener(){
+        lblIcono.addMouseListener(new MouseListener() {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                ventana.removerDatosBusquedaAvanzada(atributo_cliente, valor,pnlTag);
+                ventana.removerDatosBusquedaAvanzada(atributo_cliente, valor, pnlTag);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                
             }
-            
         });
         pnlTag.add(lblIcono);
         pnlTag.setBorder(new BevelBorder(BevelBorder.RAISED));

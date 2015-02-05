@@ -197,8 +197,8 @@ public class FrmPrecioCliente extends WebInternalFrame {
         pnlSuperiorDatosCliente.add(new WebLabel("Buscar:"));
         cmbPreciosCliente = new CmbBuscarPrecioCliente(this);
         pnlSuperiorDatosCliente.add(cmbPreciosCliente);
-        btnEditarPrecioCliente = new WebButton("Editar lista de precios", loadIcon("user_edit.png"));
-        btnNuevoPrecioCliente = new WebButton("Nueva lista de precios", loadIcon("user_add.png"));
+        btnEditarPrecioCliente = new WebButton("Editar lista de precios", loadIcon("edit.png"));
+        btnNuevoPrecioCliente = new WebButton("Nueva lista de precios", loadIcon("add.png"));
 
         btnEditarPrecioCliente.addActionListener(new ActionListener() {
 

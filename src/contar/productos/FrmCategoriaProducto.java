@@ -196,8 +196,8 @@ public class FrmCategoriaProducto extends WebInternalFrame {
         pnlSuperiorCategoriasProducto.add(new WebLabel("Buscar:"));
         cmbCategoriasProducto = new CmbBuscarCategoriaProducto(this);
         pnlSuperiorCategoriasProducto.add(cmbCategoriasProducto);
-        btnEditarCategoriaProducto = new WebButton("Editar categoria", loadIcon("edit_package.png"));
-        btnNuevaCategoriaProducto = new WebButton("Nueva categoria", loadIcon("package_add.png"));
+        btnEditarCategoriaProducto = new WebButton("Editar categoria", loadIcon("edit.png"));
+        btnNuevaCategoriaProducto = new WebButton("Nueva categoria", loadIcon("add.png"));
 
         btnEditarCategoriaProducto.addActionListener(new ActionListener() {
 

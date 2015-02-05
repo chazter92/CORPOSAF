@@ -194,12 +194,12 @@ public class FrmEstadoCliente extends WebInternalFrame {
     private Component agregarPanelSuperior() {
         WebPanel pnlSuperiorDatosCliente = new WebPanel();
         pnlSuperiorDatosCliente.setLayout(new FlowLayout());
-        pnlSuperiorDatosCliente.add(new WebLabel(loadIcon("search_accounts.png")));
+        pnlSuperiorDatosCliente.add(new WebLabel(loadIcon("search.png")));
         pnlSuperiorDatosCliente.add(new WebLabel("Buscar:"));
         cmbEstadosCliente = new CmbBuscarEstadoCliente(this);
         pnlSuperiorDatosCliente.add(cmbEstadosCliente);
-        btnEditarEstado = new WebButton("Editar estado", loadIcon("user_edit.png"));
-        btnNuevoEstado = new WebButton("Nuevo estado", loadIcon("user_add.png"));
+        btnEditarEstado = new WebButton("Editar estado", loadIcon("edit.png"));
+        btnNuevoEstado = new WebButton("Nuevo estado", loadIcon("add.png"));
 
         btnEditarEstado.addActionListener(new ActionListener() {
 

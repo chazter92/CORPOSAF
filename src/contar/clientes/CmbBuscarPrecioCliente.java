@@ -109,10 +109,12 @@ public class CmbBuscarPrecioCliente extends WebComboBox {
     }
 
     public void cargarPreciosCliente(ArrayList<BDO_Precio_Cliente> preciosEncontrados) {
-        removeAllItems();
-        for (int i = 0; i < preciosEncontrados.size(); i++) {
-            addItem(preciosEncontrados.get(i).basicsToString());
-        }
+        if (preciosEncontrados != null) {
+            removeAllItems();
+            for (int i = 0; i < preciosEncontrados.size(); i++) {
+                addItem(preciosEncontrados.get(i).basicsToString());
+            }
+        } 
     }
 
     public BDO_Precio_Cliente getPrecioSeleccionado() {

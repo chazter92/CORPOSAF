@@ -9,9 +9,9 @@ package BDO;
  * @author Chaz
  */
 public class BDO_Precio_Cliente {
-    int id_lista_precio;
-    String tipo;
-    Double descuento;
+    private int id_lista_precio;
+    private String tipo;
+    private Double descuento;
 
     public BDO_Precio_Cliente(int id_lista_precio, String tipo, Double descuento) {
         this.id_lista_precio = id_lista_precio;
