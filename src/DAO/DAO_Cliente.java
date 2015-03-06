@@ -30,6 +30,13 @@ public class DAO_Cliente {
         clientes = toBDO(conn.query("SELECT * FROM CLIENTE", new Object[0], new Object[0]));
         return clientes;
     }
+    
+    public HashMap<String, BDO_Cliente> clientesActivos() {
+        HashMap<String, BDO_Cliente> clientes;
+        clientes = toBDO(conn.query("SELECT * FROM cliente WHERE id_estado_cliente IN "
+                + "(SELECT id_estado_cliente FROM estado_cliente WHERE puede_facturar = TRUE)", new Object[0], new Object[0]));
+        return clientes;
+    }
 
     private HashMap<String, BDO_Cliente> toBDO(RowSet setCliente) {
         HashMap<String, BDO_Cliente> clientes = new HashMap<String, BDO_Cliente>();
@@ -53,6 +60,38 @@ public class DAO_Cliente {
                 + "WHERE LOWER(nombre) LIKE ? UNION "
                 + "SELECT * FROM CLIENTE "
                 + "WHERE LOWER(nit) LIKE ?", datos, datos));
+        return clientes;
+    }
+    
+    public HashMap<String, BDO_Cliente> busquedaNitApellidoActivo(String buscar) {
+        HashMap<String, BDO_Cliente> clientes = null;
+        Object[] datos = {"%" + buscar.toLowerCase() + "%", "%" + buscar.toLowerCase() + "%"};
+
+        clientes = toBDO(conn.query("SELECT * FROM CLIENTE "
+                + "WHERE LOWER(nombre) LIKE ? AND id_estado_cliente IN "
+                + "(SELECT id_estado_cliente FROM estado_cliente WHERE puede_facturar = TRUE) "
+                + "UNION SELECT * FROM CLIENTE "
+                + "WHERE LOWER(nit) LIKE ? AND id_estado_cliente IN "
+                + "(SELECT id_estado_cliente FROM estado_cliente WHERE puede_facturar = TRUE) ", datos, datos));
+        return clientes;
+    }
+    
+    public HashMap<String, BDO_Cliente> busquedaNit(String buscar) {
+        HashMap<String, BDO_Cliente> clientes = null;
+        Object[] datos = {buscar.toLowerCase()};
+
+        clientes = toBDO(conn.query("SELECT * FROM CLIENTE "
+                + "WHERE LOWER(nit) LIKE ?", datos, datos));
+        return clientes;
+    }
+    
+     public HashMap<String, BDO_Cliente> busquedaNitActivo(String buscar) {
+        HashMap<String, BDO_Cliente> clientes = null;
+        Object[] datos = {buscar.toLowerCase()};
+
+        clientes = toBDO(conn.query("SELECT * FROM CLIENTE "
+                + "WHERE LOWER(nit) LIKE ? AND id_estado_cliente IN "
+                + "(SELECT id_estado_cliente FROM estado_cliente WHERE puede_facturar = TRUE)", datos, datos));
         return clientes;
     }
 
@@ -83,9 +122,9 @@ public class DAO_Cliente {
                 + "nombre = ?, direccion = ?, email = ?, "
                 + "nombre_facturar = ?, telefono = ?, id_lista_precio = ?,"
                 + "id_estado_cliente = ?, id_empresa = ? "
-                + "WHERE nit = ? RETURNING nit", new Object[]{nuevo.getNit(), nuevo.getNombre(), nuevo.getDireccion(),
+                + "WHERE nit = ? RETURNING nit", new Object[]{nuevo.getNombre(), nuevo.getDireccion(),
                     nuevo.getEmail(), nuevo.getNombre_factura(), nuevo.getTelefono(), nuevo.getPrecio(),
-                    nuevo.getEstado(), Catalogos.getEmpresa().getId_empresa(), antiguo.getNit()}, new Object[]{"nit", "nombre", "direccion",
+                    nuevo.getEstado(), Catalogos.getEmpresa().getId_empresa(), antiguo.getNit()}, new Object[]{ "nombre", "direccion",
                     "email", "nombre_facturar", "telefono", 1, 1, 1, "nit"})) {
             if (nuevo.getAtributos() != null) {
                 for (int i = 0; i < nuevo.getAtributos().size(); i++) {

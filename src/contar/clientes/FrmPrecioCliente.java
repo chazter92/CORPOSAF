@@ -159,7 +159,7 @@ public class FrmPrecioCliente extends WebInternalFrame {
         txtNombre.setColumns(columnasDatos);
         txtNombre.setInputPrompt("Nombre de la lista de precios");
         txtNombre.setHideInputPromptOnFocus(false);
-        txtNombre.addFocusListener(new Validar_Vacio());
+        txtNombre.addFocusListener(new Validar_Vacio("El nombre de la lista de precios"));
         WebPanel pnlTipo = new WebPanel();
         pnlTipo.setLayout(new FlowLayout());
         pnlTipo.add(new WebLabel(loadIcon("users_5.png")));

@@ -161,7 +161,7 @@ public class FrmAtributoProducto extends WebInternalFrame{
         txtNombre.setColumns(columnasDatos);
         txtNombre.setInputPrompt("Nombre del atributo del producto");
         txtNombre.setHideInputPromptOnFocus(false);
-        txtNombre.addFocusListener(new Validar_Vacio());
+        txtNombre.addFocusListener(new Validar_Vacio("El nombre del atributo "));
         WebPanel pnlTipo = new WebPanel();
         pnlTipo.setLayout(new FlowLayout());
         pnlTipo.add(new WebLabel(loadIcon("label.png")));
@@ -175,7 +175,7 @@ public class FrmAtributoProducto extends WebInternalFrame{
         txtDescripcion.setColumns(columnasDatos);
         txtDescripcion.setInputPrompt("Descripción breve del atributo");
         txtDescripcion.setHideInputPromptOnFocus(false);
-        txtDescripcion.addFocusListener(new Validar_Vacio());
+        txtDescripcion.addFocusListener(new Validar_Vacio("La descripción del atributo"));
         WebPanel pnlPuedeFacturar = new WebPanel();
         pnlPuedeFacturar.setLayout(new FlowLayout());
         pnlPuedeFacturar.add(new WebLabel(loadIcon("catalog_pages.png")));

@@ -23,10 +23,7 @@ public class Validar_Double extends FocusAdapter {
             if (!valirdarDouble(ingresado)) {
                 Catalogos.mostrarMensajeError("Cifra no válida. Ingrese un número. Ejemplo: 4, 7.96", "Error", WebOptionPane.ERROR_MESSAGE);
             }
-        } else {
-            Catalogos.mostrarMensajeError("Este campo no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
-            
-        }
+        } 
     }
 
     public boolean valirdarDouble(String ingresado) {

@@ -28,7 +28,6 @@ import com.alee.laf.table.WebTable;
 import com.alee.laf.text.WebTextField;
 import com.alee.managers.language.data.TooltipWay;
 import com.alee.managers.tooltip.TooltipManager;
-import com.alee.utils.FileUtils;
 import com.alee.utils.swing.UnselectableButtonGroup;
 import contar.Catalogos;
 import java.awt.BorderLayout;
@@ -57,6 +56,8 @@ import javax.swing.ImageIcon;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.table.AbstractTableModel;
@@ -77,8 +78,8 @@ public class FrmProducto extends WebInternalFrame {
     private CmbBuscarProducto cmbConsultaProducto, cmbDatosProducto;
     private WebTable tblProductos, tblBusquedaAvanzada;
     private WebButton btnEditar, btnNuevo, btnVer, btnGuardar, btnCancelar;
-    private WebTextField txtSKU, txtConcepto, txtCosto, txtSerie;
-    private WebCheckBox chkAfectoIVA;
+    private WebTextField txtSKU, txtConcepto, txtCosto, txtSerie, txtLote;
+    private WebCheckBox chkAfectoIVA, chkAplicaSerie, chkAplicaLote;
     private WebRadioButton optServicio, optProducto;
     private WebComboBox cmbEstadoProducto, cmbCategoriaProducto, cmbImpuestoIDP;
     private Image imgFoto, imgDefault;
@@ -98,6 +99,7 @@ public class FrmProducto extends WebInternalFrame {
     private BDO_Categoria_Producto categoriaBusquedaAvanzada;
     private BDO_Estado_Producto estadoBusquedaAvanzada;
     private BDO_Impuesto impuestoBusquedaAvanzada;
+    private BDO_Producto productoSeleccionado;
 
     public ImageIcon loadIcon(final String path) {
         return loadIcon(getClass(), path);
@@ -161,6 +163,7 @@ public class FrmProducto extends WebInternalFrame {
                 actualizarEstados(cmbEstadoProducto, false);
                 actualizarCategorias(cmbCategoriaProducto, false);
                 actualizarImpuestos(cmbImpuestoIDP, false);
+                actualizarDatos(productoSeleccionado);
             }
 
             @Override
@@ -173,11 +176,24 @@ public class FrmProducto extends WebInternalFrame {
         cancelarOperacion();
     }
 
+    private void setProductoSeleccionado(BDO_Producto producto){
+        this.productoSeleccionado = producto;
+    }
+    
     private void agregarPestañasProducto() {
         pnlPestañasProducto.addTab("Mis Productos", loadIcon("folder_brick.png"), pnlConsultaProducto);
         pnlPestañasProducto.addTab("Datos del Producto", loadIcon("edit_package.png"), pnlDatosProducto);
         pnlPestañasProducto.addTab("Búsqueda avanzada", loadIcon("package_search.png"), pnlBusquedaAvanzadaProducto);
-    }
+        pnlPestañasProducto.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (pnlPestañasProducto.getSelectedIndex() == 1){
+                    actualizarDatos(productoSeleccionado);
+                    
+                }
+            }
+        });
+   }
 
     private void agregarComponentenesDatosProducto() {
         pnlDatosProducto.setLayout(new BorderLayout());
@@ -284,7 +300,8 @@ public class FrmProducto extends WebInternalFrame {
         pnlTags = new WebPanel();
         pnlTags.setLayout(new FlowLayout());
         pnlTags.setBorder(new TitledBorder("Valores seleccionados"));
-        return pnlTags;
+        WebScrollPane scroll = new WebScrollPane(pnlTags);
+        return scroll;
     }
 
     private Component agregarPanelTablaBusquedaAvanzada() {
@@ -405,10 +422,10 @@ public class FrmProducto extends WebInternalFrame {
         txtSKU.setColumns(columnasDatos);
         txtSKU.setInputPrompt("SKU del Producto");
         txtSKU.setHideInputPromptOnFocus(false);
-        txtSKU.addFocusListener(new Validar_Vacio());
+        txtSKU.addFocusListener(new Validar_Vacio("El SKU"));
         WebPanel pnlSKU = new WebPanel();
         pnlSKU.setLayout(new FlowLayout());
-        pnlSKU.add(new WebLabel(loadIcon("label.png")));
+        pnlSKU.add(new WebLabel(loadIcon("barcode.png")));
         pnlSKU.add(txtSKU);
         TooltipManager.setTooltip(pnlSKU, "SKU del Producto", TooltipWay.up);
         TooltipManager.setTooltip(txtSKU, "SKU del Producto", TooltipWay.up);
@@ -419,7 +436,7 @@ public class FrmProducto extends WebInternalFrame {
         txtConcepto.setColumns(columnasDatos);
         txtConcepto.setInputPrompt("Descripción que aparecerá en factura");
         txtConcepto.setHideInputPromptOnFocus(false);
-        txtConcepto.addFocusListener(new Validar_Vacio());
+        txtConcepto.addFocusListener(new Validar_Vacio("La descripción en factura"));
         WebPanel pnlConcepto = new WebPanel();
         pnlConcepto.setLayout(new FlowLayout());
         pnlConcepto.add(new WebLabel(loadIcon("catalog_pages.png")));
@@ -441,19 +458,62 @@ public class FrmProducto extends WebInternalFrame {
         TooltipManager.setTooltip(txtCosto, "Ingrese último costo del producto", TooltipWay.up);
         pnlDerecho.add(pnlCosto);
 
+        chkAplicaSerie = new WebCheckBox("¿Aplica serie?");
+        chkAplicaSerie.setToolTipText("Seleccione la casilla si desea ingresar una serie");
+        chkAplicaSerie.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (chkAplicaSerie.isSelected()) {
+                    txtSerie.setEditable(true);
+                } else {
+                    txtSerie.setEditable(false);
+                }
+            }
+        });
         txtSerie = new WebTextField();
-        txtSerie.setColumns(columnasDatos);
+        txtSerie.setColumns(columnasDatos - 10);
         txtSerie.setInputPrompt("Serie del producto");
         txtSerie.setHideInputPromptOnFocus(false);
-        txtSerie.addFocusListener(new Validar_Vacio());
+        txtSerie.addFocusListener(new Validar_Vacio("La serie del producto "));
         WebPanel pnlSerie = new WebPanel();
         pnlSerie.setLayout(new FlowLayout());
         pnlSerie.add(new WebLabel(loadIcon("package_green.png")));
+        pnlSerie.add(chkAplicaSerie);
         pnlSerie.add(txtSerie);
         TooltipManager.setTooltip(pnlSerie, "Ingrese serie del producto", TooltipWay.up);
         TooltipManager.setTooltip(txtSerie, "Ingrese serie del producto", TooltipWay.up);
         pnlDerecho.add(pnlSerie);
 
+        
+        chkAplicaLote = new WebCheckBox("¿Aplica lote?");
+        chkAplicaLote.setToolTipText("Seleccione la casilla si desea ingresar un lote");
+        chkAplicaLote.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (chkAplicaLote.isSelected()) {
+                    txtLote.setEditable(true);
+                } else {
+                    txtLote.setEditable(false);
+                }
+            }
+        });
+        txtLote = new WebTextField();
+        txtLote.setColumns(columnasDatos - 10);
+        txtLote.setInputPrompt("Lote del producto");
+        txtLote.setHideInputPromptOnFocus(false);
+        txtLote.addFocusListener(new Validar_Vacio("El lote del producto"));
+        WebPanel pnlLote = new WebPanel();
+        pnlLote.setLayout(new FlowLayout());
+        pnlLote.add(new WebLabel(loadIcon("label.png")));
+        pnlLote.add(chkAplicaLote);
+        pnlLote.add(txtLote);
+        TooltipManager.setTooltip(pnlLote, "Ingrese lote del producto", TooltipWay.up);
+        TooltipManager.setTooltip(txtLote, "Ingrese lote del producto", TooltipWay.up);
+        pnlDerecho.add(pnlLote);
+        
+        
         chkAfectoIVA = new WebCheckBox("¿Afecto a IVA?");
         WebPanel pnlAfectoIVA = new WebPanel();
         pnlAfectoIVA.setLayout(new FlowLayout());
@@ -646,7 +706,7 @@ public class FrmProducto extends WebInternalFrame {
         if (validarDatos()) {
             connProducto = new DAO_Producto();
             BDO_Producto nuevo = new BDO_Producto(txtSKU.getText().trim(), txtConcepto.getText().trim(),
-                    txtSerie.getText().trim(), BigDecimal.valueOf(Double.parseDouble(txtCosto.getText().trim())),
+                    txtSerie.getText().trim(),txtLote.getText().trim(), BigDecimal.valueOf(Double.parseDouble(txtCosto.getText().trim())),
                     Integer.parseInt(cmbEstadoProducto.getSelectedItem().toString().split(" | ")[0]),
                     Integer.parseInt(cmbCategoriaProducto.getSelectedItem().toString().split(" | ")[0]),
                     Catalogos.getEmpresa().getId_empresa(), 0, chkAfectoIVA.isSelected(), false, imgFoto);
@@ -764,6 +824,7 @@ public class FrmProducto extends WebInternalFrame {
 
     public void actualizarDatos(BDO_Producto ProductoSeleccionado) {
         if (ProductoSeleccionado != null) {
+            setProductoSeleccionado(ProductoSeleccionado);
             BorderLayout lyt = (BorderLayout) pnlDatosProducto.getLayout();
             if (lyt.getLayoutComponent(BorderLayout.CENTER) != null) {
                 pnlDatosProducto.remove(lyt.getLayoutComponent(BorderLayout.CENTER));
@@ -772,6 +833,32 @@ public class FrmProducto extends WebInternalFrame {
             pnlDatosProducto.add(agregarDatosIndividualesProducto(ProductoSeleccionado), BorderLayout.CENTER);
             txtSKU.setText(ProductoSeleccionado.getSku());
             txtConcepto.setText(ProductoSeleccionado.getConcepto());
+            if (ProductoSeleccionado.getSerie_producto() == null) {
+                chkAplicaSerie.setSelected(false);
+                txtSerie.clear();
+            } else {
+                if (ProductoSeleccionado.getSerie_producto().trim().isEmpty()) {
+                    chkAplicaSerie.setSelected(false);
+                    txtSerie.clear();
+                } else {
+                    chkAplicaSerie.setSelected(true);
+                }
+
+            }
+            
+            if (ProductoSeleccionado.getLote() == null) {
+                chkAplicaLote.setSelected(false);
+                txtLote.clear();
+            } else {
+                if (ProductoSeleccionado.getLote().trim().isEmpty()) {
+                    chkAplicaLote.setSelected(false);
+                    txtLote.clear();
+                } else {
+                    chkAplicaLote.setSelected(true);
+                }
+
+            }
+            txtLote.setText(ProductoSeleccionado.getLote());
             txtSerie.setText(ProductoSeleccionado.getSerie_producto());
             txtCosto.setText(ProductoSeleccionado.getCosto().toString());
             chkAfectoIVA.setSelected(ProductoSeleccionado.isAfecto_iva());
@@ -870,10 +957,18 @@ public class FrmProducto extends WebInternalFrame {
             Catalogos.mostrarMensajeError("El campo concepto no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
             return false;
         }
-
-        if (txtSerie.getText().trim().isEmpty()) {
-            Catalogos.mostrarMensajeError("El campo serie no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
-            return false;
+        if (chkAplicaSerie.isSelected()) {
+            if (txtSerie.getText().trim().isEmpty()) {
+                Catalogos.mostrarMensajeError("El campo serie no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        }
+        
+        if (chkAplicaLote.isSelected()) {
+            if (txtLote.getText().trim().isEmpty()) {
+                Catalogos.mostrarMensajeError("El campo lote no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
+                return false;
+            }
         }
 
         if (txtCosto.getText().trim().isEmpty()) {

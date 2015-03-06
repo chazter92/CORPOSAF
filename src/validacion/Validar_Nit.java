@@ -36,7 +36,6 @@ public class Validar_Nit extends FocusAdapter {
 
     public boolean valirdarNit(String nitIngresado) {
         if (nitIngresado.matches("^[1-9][0-9]+[kK]?")) {
-            
             String primeraParte = nitIngresado.substring(0, nitIngresado.length()-1);
             int factor = primeraParte.length() + 1;
             int suma = 0;
@@ -62,7 +61,9 @@ public class Validar_Nit extends FocusAdapter {
             } else {
                 return false;
             }
-        } else {
+        } else if(nitIngresado.matches("^CF|cf")){
+            return true;
+        }else {
             Catalogos.mostrarMensajeError("Formato no válido para el NIT ingresado. Verifique la información.", "Error", WebOptionPane.ERROR_MESSAGE);
             return false;
         }

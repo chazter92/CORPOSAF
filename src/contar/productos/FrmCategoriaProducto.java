@@ -158,7 +158,7 @@ public class FrmCategoriaProducto extends WebInternalFrame {
         txtNombre.setColumns(columnasDatos);
         txtNombre.setInputPrompt("Nombre de la categoria");
         txtNombre.setHideInputPromptOnFocus(false);
-        txtNombre.addFocusListener(new Validar_Vacio());
+        txtNombre.addFocusListener(new Validar_Vacio("El nombre de la categoria "));
         WebPanel pnlNombre = new WebPanel();
         pnlNombre.setLayout(new FlowLayout());
         pnlNombre.add(new WebLabel(loadIcon("label.png")));

@@ -10,30 +10,18 @@ package BDO;
  */
 public class BDO_Empresa {
     int id_empresa;
-    String nit, nombre_comercial, razon_social, direccion;
-    Double iva, super_idp, diesel_idp, regular_idp,kerosen_idp;
+    String nit, nombre_comercial, razon_social, direccion, telefono, direccion_web;
     int id_moneda;
 
-    public BDO_Empresa(int id_empresa, String nit, String nombre_comercial, String razon_social, String direccion, Double iva, Double super_idp, Double diesel_idp, Double regular_idp, Double kerosen_idp, int id_moneda) {
+    public BDO_Empresa(int id_empresa, String nit, String nombre_comercial, String razon_social, String direccion, String telefono, String direccion_web, int id_moneda) {
         this.id_empresa = id_empresa;
         this.nit = nit;
         this.nombre_comercial = nombre_comercial;
         this.razon_social = razon_social;
         this.direccion = direccion;
-        this.iva = iva;
-        this.super_idp = super_idp;
-        this.diesel_idp = diesel_idp;
-        this.regular_idp = regular_idp;
-        this.kerosen_idp = kerosen_idp;
+        this.telefono = telefono;
+        this.direccion_web = direccion_web;
         this.id_moneda = id_moneda;
-    }
-
-    public Double getDiesel_idp() {
-        return diesel_idp;
-    }
-
-    public void setDiesel_idp(Double diesel_idp) {
-        this.diesel_idp = diesel_idp;
     }
 
     public String getDireccion() {
@@ -42,6 +30,14 @@ public class BDO_Empresa {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public String getDireccion_web() {
+        return direccion_web;
+    }
+
+    public void setDireccion_web(String direccion_web) {
+        this.direccion_web = direccion_web;
     }
 
     public int getId_empresa() {
@@ -58,22 +54,6 @@ public class BDO_Empresa {
 
     public void setId_moneda(int id_moneda) {
         this.id_moneda = id_moneda;
-    }
-
-    public Double getIva() {
-        return iva;
-    }
-
-    public void setIva(Double iva) {
-        this.iva = iva;
-    }
-
-    public Double getKerosen_idp() {
-        return kerosen_idp;
-    }
-
-    public void setKerosen_idp(Double kerosen_idp) {
-        this.kerosen_idp = kerosen_idp;
     }
 
     public String getNit() {
@@ -100,20 +80,12 @@ public class BDO_Empresa {
         this.razon_social = razon_social;
     }
 
-    public Double getRegular_idp() {
-        return regular_idp;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setRegular_idp(Double regular_idp) {
-        this.regular_idp = regular_idp;
-    }
-
-    public Double getSuper_idp() {
-        return super_idp;
-    }
-
-    public void setSuper_idp(Double super_idp) {
-        this.super_idp = super_idp;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
     
     public String basicsToString(){

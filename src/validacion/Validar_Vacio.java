@@ -15,13 +15,18 @@ import javax.swing.JTextField;
  * @author Chaz
  */
 public class Validar_Vacio extends FocusAdapter {
-
+    private String campo;
+    public Validar_Vacio(String campo){
+        super();
+        this.campo = campo;
+    }
+    
     @Override
     public void focusLost(FocusEvent ev) {
         JTextField tEntrada = (JTextField) (ev.getSource());
         String ingresado = tEntrada.getText().trim();
         if (ingresado.isEmpty()) {
-            Catalogos.mostrarMensajeError("Este campo no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
+            Catalogos.mostrarMensajeError(campo+" no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
         }
     }
 }

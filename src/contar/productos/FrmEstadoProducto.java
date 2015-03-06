@@ -168,7 +168,7 @@ public class FrmEstadoProducto extends WebInternalFrame {
         txtTipo.setColumns(columnasDatos);
         txtTipo.setInputPrompt("Nombre del estado del producto");
         txtTipo.setHideInputPromptOnFocus(false);
-        txtTipo.addFocusListener(new Validar_Vacio());
+        txtTipo.addFocusListener(new Validar_Vacio("El nombre del estado del producto"));
         WebPanel pnlTipo = new WebPanel();
         pnlTipo.setLayout(new FlowLayout());
         pnlTipo.add(new WebLabel(loadIcon("package_green.png")));

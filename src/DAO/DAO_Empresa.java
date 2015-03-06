@@ -28,7 +28,7 @@ public class DAO_Empresa {
         HashMap<String, BDO_Empresa> empresas = new HashMap<String, BDO_Empresa>();
         try {
             while(setEmpresa.next()){
-                BDO_Empresa actual = new BDO_Empresa(setEmpresa.getInt("id_empresa"),setEmpresa.getString("nit"),setEmpresa.getString("nombre_comercial"),setEmpresa.getString("razon_social"),setEmpresa.getString("direccion"),setEmpresa.getDouble("iva"),setEmpresa.getDouble("super_idp"),setEmpresa.getDouble("diesel_idp"),setEmpresa.getDouble("regular_idp"),setEmpresa.getDouble("kerosen_idp"),setEmpresa.getInt("id_moneda"));
+                BDO_Empresa actual = new BDO_Empresa(setEmpresa.getInt("id_empresa"),setEmpresa.getString("nit"),setEmpresa.getString("nombre_comercial"),setEmpresa.getString("razon_social"),setEmpresa.getString("direccion"),setEmpresa.getString("telefono"),setEmpresa.getString("direccion_web"),setEmpresa.getInt("id_moneda"));
                 empresas.put(actual.basicsToString(), actual);
             }
         } catch (SQLException ex) {

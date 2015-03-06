@@ -44,7 +44,7 @@ public class FrmImpuesto extends WebInternalFrame {
     private static final Map<String, ImageIcon> iconsCache = new HashMap<String, ImageIcon>();
     private CmbBuscarImpuesto cmbImpuestos;
     private WebTextField txtNombre, txtValor;
-    private WebCheckBox chkIDP;
+    private WebCheckBox chkIDP, chkAplicaPrecioVenta;
     private WebButton btnGuardar, btnCancelar, btnNuevo, btnEditar;
     private final int columnasDatos = 25;
     private boolean editarImpuesto = false;
@@ -158,7 +158,7 @@ public class FrmImpuesto extends WebInternalFrame {
         txtNombre.setColumns(columnasDatos);
         txtNombre.setInputPrompt("Nombre del impuesto");
         txtNombre.setHideInputPromptOnFocus(false);
-        txtNombre.addFocusListener(new Validar_Vacio());
+        txtNombre.addFocusListener(new Validar_Vacio("El nombre del impuesto"));
         WebPanel pnlNombre = new WebPanel();
         pnlNombre.setLayout(new FlowLayout());
         pnlNombre.add(new WebLabel(loadIcon("id.png")));
@@ -189,6 +189,16 @@ public class FrmImpuesto extends WebInternalFrame {
         TooltipManager.setTooltip(pnlIDP, "Marque la casilla si es un impuesto de derivados del petroleo", TooltipWay.up);
         chkIDP.setToolTipText("Marque la casilla si es un impuesto de derivados del petroleo");
         pnlIzquierdo.add(pnlIDP);
+        
+        chkAplicaPrecioVenta = new WebCheckBox("¿Afecta el precio de venta?");
+
+        WebPanel pnlPrecioVenta = new WebPanel();
+        pnlPrecioVenta.setLayout(new FlowLayout());
+        pnlPrecioVenta.add(new WebLabel(loadIcon("financial_functions.png")));
+        pnlPrecioVenta.add(chkAplicaPrecioVenta);
+        TooltipManager.setTooltip(pnlPrecioVenta, "Marque la casilla si el impuesto afecta el precio de venta", TooltipWay.up);
+        chkAplicaPrecioVenta.setToolTipText("Marque la casilla si el impuesto afecta el precio de venta");
+        pnlDerecho.add(pnlPrecioVenta);
 
         pnlDatosIndividuales.add(pnlIzquierdo);
         pnlDatosIndividuales.add(pnlDerecho);
@@ -233,6 +243,7 @@ public class FrmImpuesto extends WebInternalFrame {
             txtNombre.setText(impuestoSeleccionado.getNombre());
             txtValor.setText(String.valueOf(impuestoSeleccionado.getValor()));
             chkIDP.setSelected(impuestoSeleccionado.isEs_idp());
+            chkAplicaPrecioVenta.setSelected(impuestoSeleccionado.isAplica_precio_venta());
         }
     }
     
@@ -246,7 +257,7 @@ public class FrmImpuesto extends WebInternalFrame {
         if (validarDatos()) {
             
             connImpuesto = new DAO_Impuesto();
-            BDO_Impuesto nuevo = new BDO_Impuesto(0,txtNombre.getText().trim(),Double.parseDouble(txtValor.getText().trim()),chkIDP.isSelected(),Catalogos.getEmpresa().getId_empresa());
+            BDO_Impuesto nuevo = new BDO_Impuesto(0,txtNombre.getText().trim(),Double.parseDouble(txtValor.getText().trim()),chkIDP.isSelected(),chkAplicaPrecioVenta.isSelected(),Catalogos.getEmpresa().getId_empresa());
             if (editarImpuesto) {
                 connImpuesto.actualizarImpuesto(nuevo, cmbImpuestos.getImpuestoSeleccionado());
             } else {
@@ -298,12 +309,14 @@ public class FrmImpuesto extends WebInternalFrame {
         txtNombre.clear();
         txtValor.clear();
         chkIDP.setSelected(false);
+        chkAplicaPrecioVenta.setSelected(false);
     }
     
     private void cambiarBloqueoCampos(boolean bloqueo) {
         txtNombre.setEnabled(bloqueo);
         txtValor.setEnabled(bloqueo);
         chkIDP.setEnabled(bloqueo);
+        chkAplicaPrecioVenta.setEnabled(bloqueo);
         btnGuardar.setEnabled(bloqueo);
         btnCancelar.setEnabled(bloqueo);
         cmbImpuestos.setEnabled(!bloqueo);

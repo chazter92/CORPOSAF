@@ -164,7 +164,7 @@ public class FrmEstadoCliente extends WebInternalFrame {
         txtTipo.setColumns(columnasDatos);
         txtTipo.setInputPrompt("Nombre del estado del cliente");
         txtTipo.setHideInputPromptOnFocus(false);
-        txtTipo.addFocusListener(new Validar_Vacio());
+        txtTipo.addFocusListener(new Validar_Vacio("El nombre del estado "));
         WebPanel pnlTipo = new WebPanel();
         pnlTipo.setLayout(new FlowLayout());
         pnlTipo.add(new WebLabel(loadIcon("users_5.png")));

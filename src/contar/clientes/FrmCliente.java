@@ -44,6 +44,8 @@ import javax.swing.ImageIcon;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import javax.swing.table.AbstractTableModel;
@@ -78,6 +80,7 @@ public class FrmCliente extends WebInternalFrame {
     private ArrayList<BDO_Atributo_Valor_Cliente> parametrosBusquedaAvanzada;
     private BDO_Precio_Cliente precioBusquedaAvanzada;
     private BDO_Estado_Cliente estadoBusquedaAvanzada;
+    private BDO_Cliente clienteSeleccionado;
 
     public ImageIcon loadIcon(final String path) {
         return loadIcon(getClass(), path);
@@ -143,6 +146,7 @@ public class FrmCliente extends WebInternalFrame {
                 //actualizarClientes();
                 actualizarEstados(cmbEstadoCliente, false);
                 actualizarPrecios(cmbPrecioCliente, false);
+                actualizarDatos(clienteSeleccionado);
             }
 
             @Override
@@ -158,6 +162,19 @@ public class FrmCliente extends WebInternalFrame {
         pnlPestañasCliente.addTab("Mis clientes", loadIcon("users_edit.png"), pnlConsultaCliente);
         pnlPestañasCliente.addTab("Datos del cliente", loadIcon("folder_user.png"), pnlDatosCliente);
         pnlPestañasCliente.addTab("Búsqueda avanzada", loadIcon("search_accounts.png"), pnlBusquedaAvanzadaCliente);
+        pnlPestañasCliente.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (pnlPestañasCliente.getSelectedIndex() == 1){
+                    actualizarDatos(clienteSeleccionado);
+                    
+                }
+            }
+        });
+    }
+    
+    private void setClienteSeleccionado(BDO_Cliente cliente){
+        this.clienteSeleccionado = cliente;
     }
 
     private void agregarComponentenesDatosCliente() {
@@ -343,7 +360,7 @@ public class FrmCliente extends WebInternalFrame {
         txtNombre.setColumns(columnasDatos);
         txtNombre.setInputPrompt("Nombre completo del cliente");
         txtNombre.setHideInputPromptOnFocus(false);
-        txtNombre.addFocusListener(new Validar_Vacio());
+        txtNombre.addFocusListener(new Validar_Vacio("El Nombre completo del cliente"));
         WebPanel pnlNombre = new WebPanel();
         pnlNombre.setLayout(new FlowLayout());
         pnlNombre.add(new WebLabel(loadIcon("user_orange.png")));
@@ -356,7 +373,7 @@ public class FrmCliente extends WebInternalFrame {
         txtNombreFacturar.setColumns(columnasDatos);
         txtNombreFacturar.setInputPrompt("Nombre que aparecerá en factura");
         txtNombreFacturar.setHideInputPromptOnFocus(false);
-        txtNombreFacturar.addFocusListener(new Validar_Vacio());
+        txtNombreFacturar.addFocusListener(new Validar_Vacio("El nombre que aparece en factura"));
         WebPanel pnlNombreFacturar = new WebPanel();
         pnlNombreFacturar.setLayout(new FlowLayout());
         pnlNombreFacturar.add(new WebLabel(loadIcon("user_gray.png")));
@@ -369,7 +386,7 @@ public class FrmCliente extends WebInternalFrame {
         txtDireccion.setColumns(columnasDatos);
         txtDireccion.setInputPrompt("Dirección domiciliar");
         txtDireccion.setHideInputPromptOnFocus(false);
-        txtDireccion.addFocusListener(new Validar_Vacio());
+        txtDireccion.addFocusListener(new Validar_Vacio("La dirección "));
         WebPanel pnlDireccion = new WebPanel();
         pnlDireccion.setLayout(new FlowLayout());
         pnlDireccion.add(new WebLabel(loadIcon("mail_box.png")));
@@ -645,6 +662,7 @@ public class FrmCliente extends WebInternalFrame {
 
     public void actualizarDatos(BDO_Cliente clienteSeleccionado) {
         if (clienteSeleccionado != null) {
+            setClienteSeleccionado(clienteSeleccionado);
             BorderLayout lyt = (BorderLayout) pnlDatosCliente.getLayout();
             if (lyt.getLayoutComponent(BorderLayout.CENTER) != null) {
                 pnlDatosCliente.remove(lyt.getLayoutComponent(BorderLayout.CENTER));
@@ -724,10 +742,7 @@ public class FrmCliente extends WebInternalFrame {
                         txtNit.selectAll();
                         return false;
                     }
-
-                } else {
-                    return false;
-                }
+                } 
             } else {
                 Catalogos.mostrarMensajeError("El NIT ingresado pertenece a otro cliente. Revise la información.", "Error", WebOptionPane.ERROR_MESSAGE);
                 return false;
@@ -740,12 +755,12 @@ public class FrmCliente extends WebInternalFrame {
         }
 
         if (txtNombreFacturar.getText().trim().isEmpty()) {
-            Catalogos.mostrarMensajeError("El campo Nombre no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
+            Catalogos.mostrarMensajeError("El campo Nombre facturar no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
             return false;
         }
 
         if (txtDireccion.getText().trim().isEmpty()) {
-            Catalogos.mostrarMensajeError("El campo Nombre no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
+            Catalogos.mostrarMensajeError("El campo dirección no puede estar vacío.", "Advertencia", WebOptionPane.WARNING_MESSAGE);
             return false;
         }
 

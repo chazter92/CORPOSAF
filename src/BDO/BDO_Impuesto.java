@@ -13,16 +13,28 @@ public class BDO_Impuesto {
     private String nombre;
     private double valor;
     private boolean es_idp;
+    private boolean aplica_precio_venta;
     private int id_empresa;
 
-    public BDO_Impuesto(int id_impuesto, String nombre, double valor, boolean es_idp, int id_empresa) {
+    public BDO_Impuesto(int id_impuesto, String nombre, double valor, boolean es_idp, boolean aplica_precio_venta, int id_empresa) {
         this.id_impuesto = id_impuesto;
         this.nombre = nombre;
         this.valor = valor;
         this.es_idp = es_idp;
         this.id_empresa = id_empresa;
+        this.aplica_precio_venta = aplica_precio_venta;
     }
 
+    public boolean isAplica_precio_venta() {
+        return aplica_precio_venta;
+    }
+
+    public void setAplica_precio_venta(boolean aplica_precio_venta) {
+        this.aplica_precio_venta = aplica_precio_venta;
+    }
+
+    
+    
     public boolean isEs_idp() {
         return es_idp;
     }

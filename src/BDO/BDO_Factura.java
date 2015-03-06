@@ -3,7 +3,6 @@
  */
 package BDO;
 
-import java.util.Currency;
 import java.util.Date;
 
 /**
@@ -11,15 +10,15 @@ import java.util.Date;
  * @author Chaz
  */
 public class BDO_Factura {
-    int no_factura;
+    String no_factura;
     Date fecha;
-    Currency total;
+    Double total;
     String id_documento;
     String nit;
     int tipo_pago;
     String voucher;
 
-    public BDO_Factura(int no_factura, Date fecha, Currency total, String id_documento, String nit, int tipo_pago, String voucher) {
+    public BDO_Factura(String no_factura, Date fecha, Double total, String id_documento, String nit, int tipo_pago, String voucher) {
         this.no_factura = no_factura;
         this.fecha = fecha;
         this.total = total;
@@ -61,19 +60,19 @@ public class BDO_Factura {
         this.nit = nit;
     }
 
-    public int getNo_factura() {
+    public String getNo_factura() {
         return no_factura;
     }
 
-    public void setNo_factura(int no_factura) {
+    public void setNo_factura(String no_factura) {
         this.no_factura = no_factura;
     }
 
-    public Currency getTotal() {
+    public Double getTotal() {
         return total;
     }
 
-    public void setTotal(Currency total) {
+    public void setTotal(Double total) {
         this.total = total;
     }
 

@@ -9,7 +9,9 @@ import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.managers.notification.NotificationIcon;
 import contar.Catalogos;
 import contar.Conexion;
+import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.sql.RowSet;
 
@@ -32,12 +34,18 @@ public class DAO_Impuesto {
         impuestos = toBDO(conn.query("SELECT * FROM IMPUESTO WHERE es_idp = TRUE", new Object[0], new Object[0]));
         return impuestos;
     }
+    
+    public HashMap<String, BDO_Impuesto> todosImpuestosAplicaPrecioVenta() {
+        HashMap<String, BDO_Impuesto> impuestos;
+        impuestos = toBDO(conn.query("SELECT * FROM IMPUESTO WHERE aplica_precio_venta = TRUE", new Object[0], new Object[0]));
+        return impuestos;
+    }
 
     private HashMap<String, BDO_Impuesto> toBDO(RowSet setImpuesto) {
         HashMap<String, BDO_Impuesto> impuestos = new HashMap<String, BDO_Impuesto>();
         try {
             while (setImpuesto.next()) {
-                BDO_Impuesto actual = new BDO_Impuesto(setImpuesto.getInt("id_impuesto"), setImpuesto.getString("nombre"), setImpuesto.getDouble("valor"), setImpuesto.getBoolean("es_idp"), setImpuesto.getInt("id_empresa"));
+                BDO_Impuesto actual = new BDO_Impuesto(setImpuesto.getInt("id_impuesto"), setImpuesto.getString("nombre"), setImpuesto.getDouble("valor"), setImpuesto.getBoolean("es_idp"), setImpuesto.getBoolean("aplica_precio_venta"), setImpuesto.getInt("id_empresa"));
                 impuestos.put(actual.basicsToString(), actual);
             }
         } catch (SQLException ex) {
@@ -63,7 +71,8 @@ public class DAO_Impuesto {
         if (conn.executeQuery("UPDATE IMPUESTO SET "
                 + "nombre = ?,"
                 + "valor = ?,"
-                + "es_idp = ?"
+                + "es_idp = ?,"
+                + "aplica_precio_venta = ?"
                 + "WHERE id_impuesto = ? RETURNING id_impuesto",
                 new Object[]{nuevo.getNombre(), nuevo.getValor(), nuevo.isEs_idp(), antiguo.getId_impuesto()},
                 new Object[]{"nombre", 0.0, true, 1})) {
@@ -72,10 +81,20 @@ public class DAO_Impuesto {
     }
 
     public void agregarImpuesto(BDO_Impuesto nuevo) {
-        if (conn.executeQuery("INSERT INTO IMPUESTO (nombre, valor, es_idp, id_empresa) VALUES (?,?,?,?) RETURNING id_impuesto",
-                new Object[]{nuevo.getNombre(), nuevo.getValor(), nuevo.isEs_idp(), Catalogos.getEmpresa().getId_empresa()},
-                new Object[]{"nombre", 0.0, true, 1})) {
+        if (conn.executeQuery("INSERT INTO IMPUESTO (nombre, valor, es_idp, aplica_precio_venta id_empresa) VALUES (?,?,?,?,?) RETURNING id_impuesto",
+                new Object[]{nuevo.getNombre(), nuevo.getValor(), nuevo.isEs_idp(), nuevo.isAplica_precio_venta(), Catalogos.getEmpresa().getId_empresa()},
+                new Object[]{"nombre", 0.0, true, true, 1})) {
             Catalogos.mostrarNotificacion("Impuesto " + nuevo.getNombre() + " agregada correctamente.", NotificationIcon.information);
         }
+    }
+
+    public BigDecimal getImpuestosPrecioVenta() {
+        ArrayList<BDO_Impuesto> impuestoPrecioVenta = new ArrayList(todosImpuestosAplicaPrecioVenta().values());
+        BigDecimal precioVenta = new BigDecimal(1.0);
+        for(int i=0;i<impuestoPrecioVenta.size();i++){
+            precioVenta = precioVenta.multiply(BigDecimal.valueOf((impuestoPrecioVenta.get(i).getValor()/100)+1));
+        }
+        
+        return precioVenta;
     }
 }

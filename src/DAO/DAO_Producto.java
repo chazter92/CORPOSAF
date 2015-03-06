@@ -15,7 +15,6 @@ import contar.Catalogos;
 import contar.Conexion;
 import java.awt.Image;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -56,12 +55,19 @@ public class DAO_Producto {
         productos = toBDO(conn.query("SELECT * FROM PRODUCTO", new Object[0], new Object[0]));
         return productos;
     }
+    
+    public HashMap<String, BDO_Producto> productosActivos() {
+        HashMap<String, BDO_Producto> productos;
+        productos = toBDO(conn.query("SELECT * FROM producto WHERE id_estado_producto IN"
+                + " (SELECT id_estado_producto FROM estado_producto WHERE puede_facturar = TRUE)", new Object[0], new Object[0]));
+        return productos;
+    }
 
     private HashMap<String, BDO_Producto> toBDO(RowSet setProducto) {
         HashMap<String, BDO_Producto> productos = new HashMap<String, BDO_Producto>();
         try {
             while (setProducto.next()) {
-                BDO_Producto actual = new BDO_Producto(setProducto.getString("sku"), setProducto.getString("concepto"), setProducto.getString("serie"), setProducto.getBigDecimal("precio_costo"), setProducto.getInt("id_estado_producto"), setProducto.getInt("id_categoria"), setProducto.getInt("id_empresa"), setProducto.getInt("id_impuesto_idp"), setProducto.getBoolean("afecto_iva"), setProducto.getBoolean("es_producto"), null);
+                BDO_Producto actual = new BDO_Producto(setProducto.getString("sku"), setProducto.getString("concepto"), setProducto.getString("serie"), setProducto.getString("lote"), setProducto.getBigDecimal("precio_costo"), setProducto.getInt("id_estado_producto"), setProducto.getInt("id_categoria"), setProducto.getInt("id_empresa"), setProducto.getInt("id_impuesto_idp"), setProducto.getBoolean("afecto_iva"), setProducto.getBoolean("es_producto"), null);
                 try {
                     actual.setFoto(convertirImagen(setProducto.getBytes("foto")));
                 } catch (IOException ex) {
@@ -87,6 +93,19 @@ public class DAO_Producto {
         return productos;
     }
 
+    public HashMap<String, BDO_Producto> busquedaSKUConceptoActivo(String buscar) {
+        HashMap<String, BDO_Producto> productos = null;
+        Object[] datos = {"%" + buscar.toLowerCase() + "%", "%" + buscar.toLowerCase() + "%"};
+
+        productos = toBDO(conn.query("SELECT * FROM PRODUCTO "
+                + "WHERE LOWER(concepto) LIKE ? AND id_estado_producto IN "
+                + "(SELECT id_estado_producto FROM estado_producto WHERE puede_facturar = TRUE)"
+                + "UNION SELECT * FROM PRODUCTO "
+                + "WHERE LOWER(sku) LIKE ? AND id_estado_producto IN"
+                + "(SELECT id_estado_producto FROM estado_producto WHERE puede_facturar = TRUE)", datos, datos));
+        return productos;
+    }
+    
     public void agregarProducto(BDO_Producto nuevo) {
         
         

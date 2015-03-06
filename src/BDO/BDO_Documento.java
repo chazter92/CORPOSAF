@@ -61,4 +61,8 @@ public class BDO_Documento {
     public void setResolucion(String resolucion) {
         this.resolucion = resolucion;
     }
+    
+    public String basicsToString(){
+        return this.id_documento + " | " + this.nombre_serie;
+    }
 }

@@ -15,18 +15,19 @@ import javax.swing.ImageIcon;
  */
 public class BDO_Producto {
 
-    String sku, concepto, serie_producto;
-    BigDecimal costo;
-    int id_estado_producto, id_categoria, id_empresa, id_impuesto_idp;
-    boolean afecto_iva, es_producto;
-    Image foto;
-    ArrayList<BDO_Atributo_Valor_Producto> atributos;
-    DAO_Atributo_Valor_Producto connAtributoValorProducto = new DAO_Atributo_Valor_Producto();
+    private String sku, concepto, serie_producto, lote;
+    private BigDecimal costo;
+    private int id_estado_producto, id_categoria, id_empresa, id_impuesto_idp;
+    private boolean afecto_iva, es_producto;
+    private Image foto;
+    private ArrayList<BDO_Atributo_Valor_Producto> atributos;
+    private DAO_Atributo_Valor_Producto connAtributoValorProducto = new DAO_Atributo_Valor_Producto();
     
-    public BDO_Producto(String sku, String concepto, String serie_producto, BigDecimal costo, int id_estado_producto, int id_categoria, int id_empresa, int id_impuesto_idp, boolean afecto_iva, boolean es_producto, Image foto) {
+    public BDO_Producto(String sku, String concepto, String serie_producto, String lote, BigDecimal costo, int id_estado_producto, int id_categoria, int id_empresa, int id_impuesto_idp, boolean afecto_iva, boolean es_producto, Image foto) {
         this.sku = sku;
         this.concepto = concepto;
         this.serie_producto = serie_producto;
+        this.lote = lote;
         this.costo = costo;
         this.id_estado_producto = id_estado_producto;
         this.id_categoria = id_categoria;
@@ -35,6 +36,14 @@ public class BDO_Producto {
         this.afecto_iva = afecto_iva;
         this.es_producto = es_producto;
         this.foto = foto;
+    }
+
+    public String getLote() {
+        return lote;
+    }
+
+    public void setLote(String lote) {
+        this.lote = lote;
     }
     
     public ArrayList<BDO_Atributo_Valor_Producto> getAtributos() {
@@ -138,7 +147,7 @@ public class BDO_Producto {
     }
 
     public Object[] getTypes() {
-        return new Object[]{"sku", new BigDecimal(0.0), "concepto", 1, 1, 1, "serie",
+        return new Object[]{"sku", new BigDecimal(0.0), "concepto", 1, 1, 1, "serie", "lote",
                     true, new ImageIcon(), 1, true};
     }
     
